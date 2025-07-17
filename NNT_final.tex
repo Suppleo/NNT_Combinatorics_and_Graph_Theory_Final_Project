@@ -9,6 +9,8 @@
 \usepackage{geometry} % Page layout
 \usepackage{fancyhdr} % Header and footer customization
 \usepackage{multirow}
+\usepackage{amsthm}
+\usepackage{amssymb}
 \newtheorem{assumption}{Assumption}
 \newtheorem{baitoan}{Bài toán}
 \newtheorem{cauhoi}{Câu hỏi}
@@ -86,10 +88,811 @@
 
 \newpage
 
-\section{Basic Combinatorics -- Tổ Hợp Cơ Bản}
+%------------------------------------------------------------------------------%
+\section{Project 3: Integer Partition -- Đồ Án 3: Phân Hoạch Số Nguyên}
 
-\subsection{Problems on counting}
+\begin{baitoan}[Ferrers \& Ferrers transpose diagrams -- Biểu đồ Ferrers \& biểu đồ Ferrers chuyển vị]
+    Nhập $n,k\in\mathbb{N}$. Viết chương trình {\sf C{\tt/}C++, Python} để in ra $p_k(n)$ biểu đồ Ferrers $F$ \& biểu đồ Ferrers chuyển vị $F^\top$ cho mỗi phân hoạch $\boldsymbol{\lambda} = (\lambda_1,\lambda_2,\ldots,\lambda_k)\in(\mathbb{N}^\star)^k$ có định dạng các dấu chấm được biểu diễn bởi dấu {\tt*}.
+\end{baitoan}
+
+%------------------- Giải thích thuật toán và code Ferrers -------------------%
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Phân hoạch số nguyên:} Một phân hoạch của $n$ thành $k$ phần là cách viết $n = \lambda_1 + \lambda_2 + \cdots + \lambda_k$ với $\lambda_1 \geq \lambda_2 \geq \cdots \geq \lambda_k > 0$ và $\lambda_i \in \mathbb{N}^\star$.
+    \item \textbf{Công thức đệ quy:} Gọi $P_k(n)$ là số phân hoạch của $n$ thành $k$ phần, ta có:
+    \begin{align*}
+        P_k(n) = \sum_{i=1}^{n-k+1} P_{k-1}(n-i), \quad P_0(0) = 1, \; P_0(n>0) = 0
+    \end{align*}
+    \begin{itemize}
+        \item Để phân hoạch $n$ thành $k$ phần, ta chọn phần đầu tiên là $i$ ($i \geq 1$), còn lại là phân hoạch $n-i$ thành $k-1$ phần, mỗi phần không nhỏ hơn $i$ (để đảm bảo phân hoạch không giảm).
+        \item Duyệt $i$ từ $1$ đến $n-k+1$ (vì mỗi phần ít nhất là $1$).
+        \item Trường hợp cơ sở: $P_0(0) = 1$ (chỉ có 1 cách phân hoạch 0 thành 0 phần), $P_0(n>0) = 0$ (không thể phân hoạch số dương thành 0 phần).
+    \end{itemize}
+    \item \textbf{Ý tưởng sinh phân hoạch:}
+    \begin{itemize}
+        \item Ý tưởng là xây dựng dần phân hoạch từ trái sang phải (hoặc từ trên xuống dưới), mỗi lần chọn một số $i$ (phần tử tiếp theo), đảm bảo $i \leq$ phần tử trước đó (hoặc $i \leq max$ ban đầu là $n$).
+        \item Sau khi chọn $i$, tiếp tục phân hoạch phần còn lại $n-i$ thành $k-1$ phần, mỗi phần không lớn hơn $i$.
+        \item Quá trình này được thực hiện đệ quy cho đến khi đủ $k$ phần và tổng đúng bằng $n$.
+        \item Cách này đảm bảo không sinh trùng lặp, vì luôn chọn phần tiếp theo không lớn hơn phần trước.
+    \end{itemize}
+    \item \textbf{Biểu đồ Ferrers:} Với phân hoạch $\lambda = (\lambda_1,\ldots,\lambda_k)$, biểu đồ Ferrers là bảng gồm $k$ dòng, dòng $i$ có $\lambda_i$ dấu $*$.
+    \item \textbf{Biểu đồ Ferrers chuyển vị:} Lấy bảng Ferrers, hoán vị dòng và cột (lấy cột thành dòng), ta được biểu đồ chuyển vị.
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{C++/Python:} Hai chương trình đều dùng hàm đệ quy để sinh tất cả phân hoạch của $n$ thành $k$ phần, mỗi phần không nhỏ hơn phần trước (đảm bảo không trùng lặp).
+    \item \textbf{Các biến quan trọng:}
+    \begin{itemize}
+        \item $n, k$: số cần phân hoạch và số phần.
+        \item \texttt{current}: vector/list lưu phân hoạch hiện tại đang xây dựng.
+        \item \texttt{result/partitions}: vector/list chứa tất cả các phân hoạch hợp lệ.
+        \item \texttt{max\_val}: giá trị lớn nhất có thể chọn cho phần tiếp theo (đảm bảo không tăng).
+    \end{itemize}
+    \item \textbf{In biểu đồ Ferrers:} Với mỗi phân hoạch, in ra từng dòng số lượng $*$ tương ứng.
+    \item \textbf{In Ferrers chuyển vị:} Duyệt từng dòng (theo số cột lớn nhất), với mỗi phần kiểm tra nếu còn $*$ thì in, ngược lại in khoảng trắng.
+\end{itemize}
+%------------------- Hết giải thích Ferrers -------------------%
 
 \begin{baitoan}
-	Cho
+    Nhập $n,k\in\mathbb{N}$. Đếm số phân hoạch của $n\in\mathbb{N}$. Viết chương trình {\sf C{\tt/}C++, Python} để đếm số phân hoạch $p_{\max}(n,k)$ của $n$ sao cho phần tử lớn nhất là $k$. So sánh $p_k(n)$ \& $p_{\max}(n,k)$.
 \end{baitoan}
+
+%------------------- Giải thích thuật toán và code p_k(n), p_max(n, k) -------------------%
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Phân hoạch n thành k phần ($p_k(n)$):} Là số cách viết $n = \lambda_1 + \cdots + \lambda_k$ với $\lambda_1 \geq \lambda_2 \geq \cdots \geq \lambda_k > 0$.
+    \item \textbf{Phân hoạch n có phần tử lớn nhất là k ($p_{\max}(n, k)$):} Là số phân hoạch của $n$ mà phần tử lớn nhất đúng bằng $k$.
+    \item \textbf{Công thức đệ quy:}
+    \begin{itemize}
+        \item $p_k(n) = \sum\limits_{i=1}^{n-k+1} p_{k-1}(n-i)$ với điều kiện phần tử tiếp theo $\leq$ phần trước.
+        \item $p_{\max}(n, k) = $ số phân hoạch của $n$ mà phần tử lớn nhất là $k$ (có thể sinh bằng đệ quy, mỗi nhánh không vượt quá $k$ và phải có ít nhất một phần tử bằng $k$).
+    \end{itemize}
+    \item \textbf{Ý tưởng sinh phân hoạch:}
+    \begin{itemize}
+        \item Với $p_k(n)$: Dùng đệ quy, mỗi lần chọn một số $i$ ($1 \leq i \leq$ phần trước), tiếp tục phân hoạch $n-i$ thành $k-1$ phần, mỗi phần $\leq i$.
+        \item Với $p_{\max}(n, k)$: Dùng đệ quy với các bước sau:
+        \begin{enumerate}
+            \item \textbf{Điều kiện biên:} Nếu $n = 0$ và danh sách hiện tại không rỗng, kiểm tra xem $k$ có xuất hiện trong phân hoạch không. Nếu có, thêm vào kết quả.
+            
+            \item \textbf{Giới hạn giá trị:} Tại mỗi bước, chọn số $i$ sao cho:
+            \begin{itemize}
+                \item $1 \leq i \leq \min(\text{phần trước}, k)$ (đảm bảo không tăng và không vượt quá $k$)
+                \item $i \leq n$ (đảm bảo không vượt quá số còn lại)
+            \end{itemize}
+            
+            \item \textbf{Đệ quy:} Thêm $i$ vào phân hoạch hiện tại, gọi đệ quy với $n-i$, sau đó backtrack.
+            
+            \item \textbf{Điều kiện phần tử lớn nhất:} Chỉ chấp nhận phân hoạch khi $\max(\text{phân hoạch}) = k$, tức là:
+            \begin{itemize}
+                \item $k$ phải xuất hiện ít nhất một lần trong phân hoạch
+                \item Không có phần tử nào lớn hơn $k$
+            \end{itemize}
+        \end{enumerate}
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{C++/Python:} Hai chương trình đều dùng đệ quy để sinh các phân hoạch theo hai tiêu chí trên.
+    \item \textbf{Các biến quan trọng:}
+    \begin{itemize}
+        \item $n, k$: số cần phân hoạch và số phần/phần tử lớn nhất.
+        \item \texttt{current}: vector/list lưu phân hoạch hiện tại.
+        \item \texttt{result}: vector/list chứa các phân hoạch hợp lệ.
+        \item \texttt{max\_val}: giá trị lớn nhất có thể chọn cho phần tiếp theo (đảm bảo không tăng).
+    \end{itemize}
+    \item \textbf{So sánh:} $p_k(n)$ và $p_{\max}(n, k)$
+
+    \[
+    p_k(n) = p_{\max}(n, k)
+    \]
+
+    \begin{proof}[Chứng minh]
+        Ta chứng minh bằng phép biến đổi transpose trên sơ đồ Ferrers.
+
+        \textbf{Ý tưởng:} Mỗi phân hoạch được biểu diễn bởi sơ đồ Ferrers (dùng dấu *). Phép transpose là "lật" sơ đồ qua đường chéo chính.
+        
+        \textbf{Bước 1:} Cho phân hoạch $n$ thành $k$ phần: $\lambda = (\lambda_1, \lambda_2, \ldots, \lambda_k)$.
+        
+        \textbf{Bước 2:} Biểu diễn bằng sơ đồ Ferrers và thực hiện phép transpose.
+        
+        \textbf{Ví dụ:} $10 = 5 + 3 + 2$ (phân hoạch thành 3 phần)
+        
+        \begin{verbatim}
+        Sơ đồ gốc:                  Sơ đồ transpose:
+        * * * * *                   * * *
+        * * *                       * * *
+        * *                         * *
+                                    *
+                                    *
+        \end{verbatim}
+        
+        Đọc theo hàng: $10 = 3 + 3 + 2 + 1 + 1$ (phần tử lớn nhất là 3)
+        
+        \textbf{Bước 3:} Tổng quát hóa:
+        \begin{itemize}
+            \item Nếu $\lambda$ có $k$ hàng, thì $\lambda'$ có cột đầu tiên cao $k$ đơn vị
+            \item Do đó $\lambda'$ có phần tử lớn nhất là $k$
+            \item Phép transpose là song ánh: $(\lambda')' = \lambda$
+        \end{itemize}
+    \end{proof}
+\end{itemize}
+
+\textbf{Ví dụ:} $n=5, k=2$
+\begin{itemize}
+    \item $p_2(5)$: các phân hoạch là $(4,1), (3,2)$.
+    \item $p_{\max}(5,2)$: các phân hoạch là $(2,2,1), (2,1,1,1)$.
+\end{itemize}
+
+%------------------- Hết giải thích p_k(n), p_max(n, k) -------------------%
+
+\begin{baitoan}[Số phân hoạch tự liên hợp]
+    Nhập $n,k\in\mathbb{N}$. (a) Đếm số phân hoạch tự liên hợp của $n$ có $k$ phần, ký hiệu $p_k^{\rm selfcjg}(n)$, rồi in ra các phân hoạch đó. (b) Đếm số phân hoạch của $n$ có lẻ phần, rồi so sánh với $p_k^{\rm selfcjg}(n)$. (c) Thiết lập công thức truy hồi cho $p_k^{\rm selfcjg}(n)$, rồi implementation bằng: (i) đệ quy. (ii) quy hoạch động.
+\end{baitoan}
+
+%------------------- Giải thích thuật toán và code phân hoạch tự liên hợp -------------------%
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Phân hoạch tự liên hợp (self-conjugate partition):}
+    
+    Một phân hoạch 
+    \[
+      \boldsymbol\lambda = (\lambda_1,\lambda_2,\dots,\lambda_k),
+      \quad
+      \lambda_1\ge\lambda_2\ge\cdots\ge\lambda_k>0,
+      \;\sum_i\lambda_i=n
+    \]
+    gọi là tự liên hợp nếu sơ đồ Ferrers khi chuyển vị (transpose) vẫn cho lại chính nó, tức là đối xứng qua đường chéo chính.
+
+    \item \textbf{Đặc trưng:}
+    
+    Khi phân hoạch tự liên hợp, ta nhìn lên Ferrers diagram và đánh dấu dãy độ dài mỗi “nhánh chéo” (hook trên đường chéo chính). Gọi $a_i$ là số ô trên đường chéo chính hàng thứ $i$. Mỗi ô đó kéo ra hai cánh (hàng và cột) cộng thêm chính ô chéo, nên mỗi $a_i$ đóng góp
+    \[
+      2\,a_i - 1
+    \]
+    ô. Vì có các nhánh chéo từ $i=1$ đến $k$, tổng ô bằng
+    \[
+      n \;=\; \sum_{i=1}^k (2\,a_i - 1).
+    \]
+    Ví dụ, với $\boldsymbol a=(3,2,1)$, ta có $n= (2\cdot3-1)+(2\cdot2-1)+(2\cdot1-1)=5+3+1=9$, và Ferrers diagram:
+    \begin{verbatim}
+    ***   <- hàng 1 (3 ô)
+    **    <- hàng 2 (2 ô)
+    *     <- hàng 3 (1 ô)
+    \end{verbatim}
+    Đây là hình đối xứng (self-conjugate).
+
+    \item \textbf{Công thức đệ quy:}
+
+    Gọi $p_k^{\rm selfcjg}(n)$ số phân hoạch tự liên hợp của $n$ có $k$ nhánh chéo (tức $k$ phần).  
+    Để xây phân hoạch có $k$ nhánh, ta chọn độ dài nhánh cuối cùng $a_k=i\ge1$, nó chiếm $2i-1$ ô, còn lại $n - i(2\cdot k -1)$ ô và $k-1$ nhánh:
+    \[
+      p_k^{\rm selfcjg}(n)
+      = \sum_{i=1}^{\lfloor n/(2k-1)\rfloor}
+        p_{k-1}^{\rm selfcjg}\bigl(n - i\,(2k-1)\bigr),
+    \]
+    với khởi tạo $p_0^{\rm selfcjg}(0)=1$, còn $p_0^{\rm selfcjg}(n>0)=0$.
+
+    \item \textbf{Ý tưởng sinh phân hoạch tự liên hợp:}
+
+    Chúng ta sinh đệ quy với tham số $(n,k,maxVal)$, trong đó $maxVal$ ban đầu đặt bằng $\lfloor n/(2k-1)\rfloor$, rồi mỗi bước:
+    \begin{itemize}
+        \item Lấy $i$ từ $maxVal$ xuống 1 (đảm bảo thứ tự không tăng).
+        \item Gán $a_k=i$, giảm $n\leftarrow n - i(2k-1)$, $k\leftarrow k-1$, cập nhật $maxVal\leftarrow i$.
+        \item Khi $k=0$ và $n=0$, thu được phân hoạch hợp lệ.
+    \end{itemize}
+
+    Vì chúng ta chọn $i$ từ lớn xuống nhỏ, nên luôn giữ được $\;a_1\ge a_2\ge\cdots\ge a_k$.
+
+    \item \textbf{So sánh với phân hoạch có lẻ phần:}
+
+    \emph{Định lý cổ điển:} Số phân hoạch tự liên hợp của $n$ bằng số phân hoạch của $n$ có \emph{số phần lẻ}.  
+
+    \textbf{Chứng minh ngắn:}  
+    - Mỗi phân hoạch tự liên hợp có Ferrers diagram đối xứng.  
+    - Nếu ta cắt Ferrers diagram thành đường chéo chính, hai nửa trên-dưới đối xứng và có cùng số phần. Chuyển đổi đó cho ra một phân hoạch có số phần lẻ (các hàng phía trên chéo).  
+    - Ngược lại, từ phân hoạch có lẻ phần, ta ghép hai nửa đối xứng để được self-conjugate.  
+
+    Ví dụ với $n=5$:
+    \begin{verbatim}
+    Self-conjugate:      Odd-parts partition:
+    
+     * * *               * * *
+     *                   *
+     *                   *
+    
+     đây là (3,1,1)       đây là 3+1+1 (3 phần lẻ)
+    \end{verbatim}
+
+    Cả hai đều có đúng 3 hàng (3 phần), nên số lượng song hành.
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{C++/Python:} Hai chương trình đều dùng đệ quy để sinh các phân hoạch tự liên hợp, kiểm tra tổng và số phần.
+    \item \textbf{Các biến quan trọng:}
+    \begin{itemize}
+        \item $n, k$: số cần phân hoạch và số phần.
+        \item \texttt{current}: vector/list lưu dãy $a_i$ hiện tại.
+        \item \texttt{result}: vector/list chứa các phân hoạch hợp lệ.
+        \item \texttt{min\_val}: giá trị nhỏ nhất có thể chọn cho phần tiếp theo (đảm bảo không tăng).
+    \end{itemize}
+    \item \textbf{Đếm số phân hoạch lẻ phần:} Dùng đệ quy sinh tất cả phân hoạch của $n$, đếm số phân hoạch có số phần lẻ.
+    \item \textbf{Quy hoạch động:} Dùng mảng 2 chiều $dp[n][k]$ với $dp[0][0]=1$, cập nhật theo công thức đệ quy ở trên.
+\end{itemize}
+
+\textbf{Ví dụ:} $n=7, k=2$
+\begin{itemize}
+    \item Các phân hoạch tự liên hợp: $(3,2)$ vì $3\times1 + 2\times3 = 3+6=9$ (không hợp lệ), $(2,1)$ vì $2\times1 + 1\times3 = 2+3=5$ (không hợp lệ), ...
+\end{itemize}
+
+%------------------- Hết giải thích phân hoạch tự liên hợp -------------------%
+
+%------------------------------------------------------------------------------%
+
+\section{Project 4: Graph \& Tree Traversing Problems -- Đồ Án 4: Các Bài Toán Duyệt Đồ Thị \& Cây}
+\begin{baitoan}
+    Viết chương trình {\sf C{\tt/}C++, Python} chuyển đổi giữa 4 dạng biểu diễn: adjacency matrix, adjacency list, extended adjacency list, adjacency map cho $3$ đồ thị: đơn đồ thị, đa đồ thị, đồ thị tổng quát; \& 3 dạng biểu diễn: array of parents, first-child next-sibling, graph-based representation of trees của cây.
+\end{baitoan}
+Sẽ có $3A_4^3 + A_3^2 = 36 + 6 = 42$ converter programs.
+
+\begin{baitoan}
+    Làm Problems 1.1--1.6 \& Exercises 1.1--1.10
+\end{baitoan}
+
+\begin{baitoan}[Tree edit distance]
+    Viết chương trình {\sf C{\tt/}C++, Python} để giải bài toán tree edit distance problem bằng cách sử dụng: (a) Backtracking. (b) Branch-\&-bound. (c) Divide-\&-conquer -- chia để trị. (d) Dynamic programming -- Quy hoạch động.
+\end{baitoan}
+
+\begin{baitoan}[Tree traversal -- Duyệt cây]
+    Viết chương trình {\sf C{\tt/}C++, Python} để duyệt cây: (a) preorder traversal. (b) postorder traversal. (c) top-down traveral. (d) bottom-up traversal.
+\end{baitoan}
+
+%------------------- Giải thích thuật toán và code duyệt cây Preorder -------------------%
+\textbf{(a) Preorder traversal}
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Duyệt cây theo thứ tự trước (preorder traversal):} \textit{Preorder} là phương pháp duyệt cây mà tại mỗi nút, ta thăm nút đó trước, sau đó lần lượt duyệt các cây con từ trái sang phải.
+    \item \textbf{Đệ quy:}
+    \begin{itemize}
+        \item Gọi $T$ là một cây gốc, $u$ là gốc của $T$, $C(u)$ là tập các con trực tiếp của $u$.
+        \item Thứ tự duyệt preorder của $T$ là: đầu tiên thăm $u$, sau đó lần lượt duyệt preorder từng cây con $T_v$ với $v \in C(u)$ (theo thứ tự từ trái sang phải).
+        \item Nếu $u$ là lá (không có con), chỉ thăm $u$. Nếu $u$ có các con $v_1, v_2, ..., v_k$, thì thứ tự duyệt là: $u, \text{preorder}(v_1), \text{preorder}(v_2), ..., \text{preorder}(v_k)$.
+    \end{itemize}
+    \item \textbf{Ý tưởng chi tiết:}
+    \begin{itemize}
+        \item \textbf{Bước 1:} Bắt đầu từ gốc $u$, in ra nhãn của $u$ (thăm $u$).
+        \item \textbf{Bước 2:} Duyệt qua từng con $v$ của $u$ (theo thứ tự đã cho), với mỗi $v$ ta gọi đệ quy duyệt preorder cây con gốc $v$.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Biến số quan trọng:}
+    \begin{itemize}
+        \item $n$: số lượng đỉnh của cây.
+        \item \texttt{tree}: danh sách kề, \texttt{tree[u]} chứa các con trực tiếp của đỉnh $u$.
+        \item \texttt{is\_child}: mảng đánh dấu đỉnh nào là con (để tìm gốc).
+        \item \texttt{root}: đỉnh gốc của cây (không là con của đỉnh nào).
+    \end{itemize}
+    \item \textbf{Đọc input:} Mỗi dòng gồm: $u$ $k$ $v_1$ $v_2$ ... $v_k$ (đỉnh $u$ có $k$ con là $v_1, ..., v_k$).
+    \item \textbf{Hàm \texttt{preorder(u, tree)}:} In ra $u$, sau đó đệ quy duyệt từng con $v$ của $u$.
+    \item \textbf{Kết quả:} In ra thứ tự các đỉnh theo duyệt preorder.
+\end{itemize}
+
+%------------------- Hết giải thích preorder -------------------%
+
+%------------------- Giải thích thuật toán và code duyệt cây Postorder -------------------%
+
+\textbf{(b) Postorder traversal}
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Duyệt cây theo thứ tự sau (postorder traversal):} \textit{Postorder} là phương pháp duyệt cây mà tại mỗi nút, ta duyệt tất cả các cây con từ trái sang phải trước, sau đó mới thăm nút đó.
+    \item \textbf{Đệ quy:}
+    \begin{itemize}
+        \item Gọi $T$ là một cây gốc, $u$ là gốc của $T$, $C(u)$ là tập các con trực tiếp của $u$.
+        \item Thứ tự duyệt postorder của $T$ là: đầu tiên lần lượt duyệt postorder từng cây con $T_v$ với $v \in C(u)$ (theo thứ tự từ trái sang phải), sau đó mới thăm $u$.
+        \item Nếu $u$ là lá (không có con), chỉ thăm $u$.
+        \item Nếu $u$ có các con $v_1, v_2, ..., v_k$, thì thứ tự duyệt là: $\text{postorder}(v_1), \text{postorder}(v_2), ..., \text{postorder}(v_k), u$.
+    \end{itemize}
+    \item \textbf{Ý tưởng chi tiết:}
+    \begin{itemize}
+        \item \textbf{Bước 1:} Bắt đầu từ gốc $u$, lần lượt duyệt qua từng con $v$ của $u$ (theo thứ tự đã cho), với mỗi $v$ ta gọi đệ quy duyệt postorder cây con gốc $v$.
+        \item \textbf{Bước 2:} Sau khi duyệt xong tất cả các con, in ra nhãn của $u$ (thăm $u$).
+        \item \textbf{Bản chất:} Quá trình này là "đi hết các nhánh con trước, cha sau", đảm bảo thứ tự duyệt là: con trái $\to$ con phải $\to$ cha.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Biến số quan trọng:}
+    \begin{itemize}
+        \item $n$: số lượng đỉnh của cây.
+        \item \texttt{tree}: danh sách kề, \texttt{tree[u]} chứa các con trực tiếp của đỉnh $u$.
+        \item \texttt{is\_child}: mảng đánh dấu đỉnh nào là con (để tìm gốc).
+        \item \texttt{root}: đỉnh gốc của cây (không là con của đỉnh nào).
+    \end{itemize}
+    \item \textbf{Đọc input:} Mỗi dòng gồm: $u$ $k$ $v_1$ $v_2$ ... $v_k$ (đỉnh $u$ có $k$ con là $v_1, ..., v_k$).
+    \item \textbf{Hàm \texttt{postorder(u, tree)}:} Đầu tiên đệ quy duyệt từng con $v$ của $u$, sau đó in ra $u$.
+    \item \textbf{Kết quả:} In ra thứ tự các đỉnh theo duyệt postorder.
+\end{itemize}
+
+%------------------- Hết giải thích postorder -------------------%
+
+%------------------- Giải thích thuật toán và code duyệt cây Top-down -------------------%
+
+\textbf{(c) Top-down traversal}
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Duyệt cây top-down (từ gốc xuống lá):} Top-down là phương pháp duyệt cây mà tại mỗi nút, ta xử lý nút đó trước, sau đó truyền thông tin (nếu có) từ cha xuống các con, rồi tiếp tục duyệt các con. 
+    \item \textbf{Thứ tự thăm:} Các đỉnh được thăm theo thứ tự không giảm của độ sâu (depth), và các đỉnh cùng độ sâu được thăm từ trái sang phải (theo thứ tự con trong danh sách kề).
+    \item \textbf{Đệ quy:}
+    \begin{itemize}
+        \item Gọi $T$ là một cây gốc, $u$ là gốc của $T$, $C(u)$ là tập các con trực tiếp của $u$.
+        \item Khi duyệt top-down, ta có thể truyền một đại lượng (ví dụ: độ sâu, tổng giá trị từ gốc đến $u$, ...) từ cha xuống con.
+        \item Với mỗi lời gọi \texttt{top\_down(u, depth)}, ta xử lý $u$ ở độ sâu $depth$, sau đó lần lượt duyệt các con $v$ của $u$ với $depth+1$ (theo thứ tự trái sang phải).
+        \item Ví dụ: Nếu truyền độ sâu, thì $\text{info}$ là $\text{depth}$, $\text{update}(\text{depth}) = \text{depth} + 1$.
+    \end{itemize}
+    \item \textbf{Ý tưởng chi tiết:}
+    \begin{itemize}
+        \item \textbf{Bước 1:} Bắt đầu từ gốc $u$ với thông tin ban đầu (ví dụ: depth = 0), xử lý $u$ (in ra nhãn, độ sâu, ...).
+        \item \textbf{Bước 2:} Với mỗi con $v$ của $u$ (theo thứ tự trái sang phải), truyền thông tin mới (ví dụ: depth + 1) và gọi đệ quy duyệt top-down cây con gốc $v$.
+        \item \textbf{Bản chất:} Tất cả các đỉnh ở độ sâu $d$ sẽ được thăm trước khi đến các đỉnh ở độ sâu $d+1$, và các đỉnh cùng độ sâu được thăm từ trái sang phải.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Biến số quan trọng:}
+    \begin{itemize}
+        \item $n$: số lượng đỉnh của cây.
+        \item \texttt{tree}: danh sách kề, \texttt{tree[u]} chứa các con trực tiếp của đỉnh $u$.
+        \item \texttt{is\_child}: mảng đánh dấu đỉnh nào là con (để tìm gốc).
+        \item \texttt{root}: đỉnh gốc của cây (không là con của đỉnh nào).
+        \item \texttt{depth}: độ sâu hiện tại của đỉnh $u$ (truyền từ cha xuống con).
+    \end{itemize}
+    \item \textbf{Đọc input:} Mỗi dòng gồm: $u$ $k$ $v_1$ $v_2$ ... $v_k$ (đỉnh $u$ có $k$ con là $v_1, ..., v_k$).
+    \item \textbf{Hàm \texttt{top\_down(u, tree, depth)}:} Xử lý $u$ (in ra nhãn, độ sâu), sau đó đệ quy duyệt từng con $v$ của $u$ với $\texttt{depth}+1$ (theo thứ tự trái sang phải).
+    \item \textbf{Kết quả:} In ra từng đỉnh và độ sâu tương ứng theo thứ tự top-down: các đỉnh ở độ sâu nhỏ hơn được in trước, các đỉnh cùng độ sâu in từ trái sang phải.
+\end{itemize}
+
+%------------------- Hết giải thích top-down -------------------%
+
+%------------------- Giải thích thuật toán và code duyệt cây Bottom-up -------------------%
+
+\textbf{(d) Bottom-up traversal}
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Duyệt cây bottom-up (từ lá lên gốc):} Bottom-up là phương pháp duyệt cây mà các đỉnh được thăm theo thứ tự không giảm của chiều cao (height), các đỉnh cùng chiều cao được thăm theo thứ tự không giảm của độ sâu (depth), các đỉnh cùng chiều cao và độ sâu được thăm từ trái sang phải.
+    \item \textbf{Thứ tự thăm:}
+    \begin{itemize}
+        \item Đầu tiên thăm tất cả các đỉnh có chiều cao nhỏ nhất (tức là các lá), sau đó đến các đỉnh có chiều cao lớn hơn, ... cuối cùng là gốc (chiều cao lớn nhất).
+        \item Các đỉnh cùng chiều cao được thăm theo thứ tự không giảm của độ sâu (tức là các đỉnh ở gần gốc hơn được in sau).
+        \item Nếu cùng chiều cao và cùng độ sâu, các đỉnh được thăm từ trái sang phải (theo thứ tự con trong danh sách kề).
+    \end{itemize}
+    \item \textbf{Công thức:}
+    \begin{itemize}
+        \item Gọi $h(u)$ là chiều cao của đỉnh $u$, $d(u)$ là độ sâu của $u$.
+        \item Duyệt qua tất cả các đỉnh, sắp xếp theo bộ $(h(u), d(u), \text{thứ tự trái sang phải})$ tăng dần, rồi in ra.
+        \item Chiều cao $h(u)$ được tính đệ quy: $h(u) = 1 + \max\{h(v) : v \text{ là con của } u\}$, lá có $h(u) = 0$.
+    \end{itemize}
+    \item \textbf{Ý tưởng chi tiết:}
+    \begin{itemize}
+        \item \textbf{Bước 1:} Duyệt cây để tính chiều cao và độ sâu cho từng đỉnh.
+        \item \textbf{Bước 2:} Gom tất cả các đỉnh lại, sắp xếp theo chiều cao tăng dần, cùng chiều cao thì theo độ sâu tăng dần, cùng chiều cao và độ sâu thì theo thứ tự trái sang phải.
+        \item \textbf{Bước 3:} In ra các đỉnh theo từng mức chiều cao.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Biến số quan trọng:}
+    \begin{itemize}
+        \item $n$: số lượng đỉnh của cây.
+        \item \texttt{tree}: danh sách kề, \texttt{tree[u]} chứa các con trực tiếp của đỉnh $u$.
+        \item \texttt{is\_child}: mảng đánh dấu đỉnh nào là con (để tìm gốc).
+        \item \texttt{root}: đỉnh gốc của cây (không là con của đỉnh nào).
+        \item \texttt{depths[u]}: độ sâu của đỉnh $u$.
+        \item \texttt{heights[u]}: chiều cao của đỉnh $u$.
+    \end{itemize}
+    \item \textbf{Đọc input:} Mỗi dòng gồm: $u$ $k$ $v_1$ $v_2$ ... $v_k$ (đỉnh $u$ có $k$ con là $v_1, ..., v_k$).
+    \item \textbf{Hàm \texttt{dfs\_height(u, tree, depth, depths, heights)}:} Tính đệ quy chiều cao và độ sâu cho từng đỉnh.
+    \item \textbf{Hàm \texttt{bottom\_up(tree, root, n)}:} Gom thông tin các đỉnh, sắp xếp và in ra theo thứ tự bottom-up.
+    \item \textbf{Kết quả:} In ra các đỉnh theo từng mức chiều cao, mỗi mức là các đỉnh cùng chiều cao, theo thứ tự độ sâu tăng dần, trái sang phải.
+\end{itemize}
+
+%------------------- Hết giải thích bottom-up -------------------%
+
+%------------------------------------------------------------------------------%
+
+\subsection{Breadth-first search algorithm -- Thuật toán tìm kiếm theo chiều rộng}
+
+\begin{baitoan}
+    Let $G = (V,E)$ be a finite simple graph. Implement the breadth-first search on $G$.
+\end{baitoan}
+
+%------------------- Breadth-First Search Algorithm for Simple Graph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Thực hiện thuật toán duyệt theo chiều rộng (BFS) trên đồ thị đơn hữu hạn, bắt đầu từ một đỉnh cho trước.
+    \item \textbf{Ý tưởng chính:} BFS duyệt đồ thị theo từng lớp, sử dụng hàng đợi (queue) để lần lượt thăm các đỉnh kề gần nhất trước.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề (adjacency list), \texttt{adj[u]} chứa các đỉnh kề với đỉnh $u$.
+        \item \texttt{visited}: Mảng boolean để đánh dấu các đỉnh đã được thăm.
+        \item \texttt{queue}: Hàng đợi để lưu trữ các đỉnh sẽ được thăm tiếp theo.
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh.
+        \item Nhập đỉnh bắt đầu $start$.
+        \item Khởi tạo mảng \texttt{visited} với tất cả giá trị \texttt{false}, đánh dấu \texttt{visited[start] = true}.
+        \item Đưa $start$ vào hàng đợi.
+        \item Lặp cho đến khi hàng đợi rỗng:
+        \begin{itemize}
+            \item Lấy ra đỉnh đầu hàng đợi, in ra đỉnh đó.
+            \item Với mỗi đỉnh kề chưa được thăm, đánh dấu đã thăm và đưa vào hàng đợi.
+        \end{itemize}
+    \end{enumerate}
+    \item \textbf{Lưu ý:} Đồ thị được coi là vô hướng (undirected), nên mỗi cạnh được thêm vào cả hai chiều.
+\end{itemize}
+
+\begin{baitoan}
+    Let $G = (V,E)$ be a finite multigraph. Implement the breadth-first search on $G$.
+\end{baitoan}
+
+%------------------- Breadth-First Search Algorithm for Multigraph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Thực hiện thuật toán duyệt theo chiều rộng (BFS) trên đa đồ thị hữu hạn, cho phép nhiều cạnh giữa hai đỉnh nhưng không có khuyên (loop).
+    \item \textbf{Ý tưởng chính:} BFS vẫn áp dụng được cho multigraph. Khi duyệt các cạnh kề, xét tất cả các cạnh (kể cả trùng lặp) giữa hai đỉnh. Đảm bảo không duyệt lại đỉnh đã thăm.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề, \texttt{adj[u]} chứa tất cả các đỉnh kề với $u$ (có thể lặp lại nếu có nhiều cạnh).
+        \item \texttt{visited}: Mảng boolean để đánh dấu các đỉnh đã được thăm.
+        \item \texttt{queue}: Hàng đợi để lưu trữ các đỉnh sẽ được thăm tiếp theo.
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh (có thể lặp lại, không cho phép cạnh khuyên $u = v$).
+        \item Nhập đỉnh bắt đầu $start$.
+        \item Khởi tạo mảng \texttt{visited} với tất cả giá trị \texttt{false}, đánh dấu \texttt{visited[start] = true}.
+        \item Đưa $start$ vào hàng đợi.
+        \item Lặp cho đến khi hàng đợi rỗng:
+        \begin{itemize}
+            \item Lấy ra đỉnh đầu hàng đợi, in ra đỉnh đó.
+            \item Với mỗi đỉnh kề chưa được thăm, đánh dấu đã thăm và đưa vào hàng đợi.
+        \end{itemize}
+    \end{enumerate}
+    \item \textbf{Lưu ý:} Đa đồ thị cho phép nhiều cạnh giữa hai đỉnh, nhưng không cho phép cạnh khuyên ($u = v$). Đồ thị được coi là vô hướng (undirected), nên mỗi cạnh được thêm vào cả hai chiều.
+\end{itemize}
+
+\begin{baitoan}
+    Let $G = (V,E)$ be a general graph. Implement the breadth-first search on $G$.
+\end{baitoan}
+
+%------------------- Breadth-First Search Algorithm for General Graph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Thực hiện thuật toán duyệt theo chiều rộng (BFS) trên đồ thị tổng quát (general graph) hữu hạn, cho phép nhiều cạnh giữa hai đỉnh và cho phép cạnh khuyên (loop).
+    \item \textbf{Ý tưởng chính:} BFS vẫn áp dụng được cho general graph. Khi duyệt các cạnh kề, xét tất cả các cạnh (kể cả trùng lặp và cạnh khuyên) giữa hai đỉnh. Đảm bảo không duyệt lại đỉnh đã thăm.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề, \texttt{adj[u]} chứa tất cả các đỉnh kề với $u$ (có thể lặp lại nếu có nhiều cạnh, và có thể có $u = v$ nếu là cạnh khuyên).
+        \item \texttt{visited}: Mảng boolean để đánh dấu các đỉnh đã được thăm.
+        \item \texttt{queue}: Hàng đợi để lưu trữ các đỉnh sẽ được thăm tiếp theo.
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh (có thể lặp lại và có thể là cạnh khuyên).
+        \item Nhập đỉnh bắt đầu $start$.
+        \item Khởi tạo mảng \texttt{visited} với tất cả giá trị \texttt{false}, đánh dấu \texttt{visited[start] = true}.
+        \item Đưa $start$ vào hàng đợi.
+        \item Lặp cho đến khi hàng đợi rỗng:
+        \begin{itemize}
+            \item Lấy ra đỉnh đầu hàng đợi, in ra đỉnh đó.
+            \item Với mỗi đỉnh kề chưa được thăm, đánh dấu đã thăm và đưa vào hàng đợi.
+        \end{itemize}
+    \end{enumerate}
+    \item \textbf{Lưu ý:} Đồ thị tổng quát cho phép nhiều cạnh giữa hai đỉnh và cho phép cạnh khuyên ($u = v$). Đồ thị được coi là vô hướng (undirected), nên mỗi cạnh được thêm vào cả hai chiều (kể cả cạnh khuyên).
+\end{itemize}
+
+%------------------------------------------------------------------------------%
+
+\subsection{Depth-first search algorithm -- Thuật toán tìm kiếm theo chiều rộng}
+
+\begin{baitoan}
+    Let $G = (V,E)$ be a finite simple graph. Implement the depth-first search on $G$.
+\end{baitoan}
+
+%------------------- Depth-First Search Algorithm for Simple Graph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Thực hiện thuật toán duyệt theo chiều sâu (DFS) trên đồ thị đơn hữu hạn, bắt đầu từ một đỉnh cho trước.
+    \item \textbf{Ý tưởng chính:} DFS duyệt đồ thị bằng cách đi sâu vào một nhánh trước khi quay lại và thử nhánh khác. Sử dụng đệ quy hoặc stack để thực hiện.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề (adjacency list), \texttt{adj[u]} chứa các đỉnh kề với đỉnh $u$.
+        \item \texttt{visited}: Mảng boolean để đánh dấu các đỉnh đã được thăm.
+        \item \texttt{stack}: Cấu trúc dữ liệu stack để lưu trữ các đỉnh cần thăm (trong phiên bản iterative).
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh.
+        \item Nhập đỉnh bắt đầu $start$.
+        \item Khởi tạo mảng \texttt{visited} với tất cả giá trị \texttt{false}.
+        \item Thực hiện DFS bằng hai cách:
+        \begin{itemize}
+            \item \textbf{Đệ quy:} Gọi hàm \texttt{dfs\_recursive} với đỉnh bắt đầu.
+            \begin{itemize}
+                \item \textbf{Cách thức:} 
+                \begin{enumerate}
+                    \item Đánh dấu đỉnh hiện tại là đã thăm.
+                    \item In ra đỉnh hiện tại.
+                    \item Với mỗi đỉnh kề chưa thăm, gọi đệ quy \texttt{dfs\_recursive(adj, visited, neighbor)}.
+                    \item Khi không còn đỉnh kề nào chưa thăm, quay lại (backtrack).
+                \end{enumerate}
+            \end{itemize}
+            \item \textbf{Iterative:} Sử dụng stack trong hàm \texttt{dfs\_iterative}.
+        \end{itemize}
+        \item Trong mỗi bước DFS:
+        \begin{itemize}
+            \item Đánh dấu đỉnh hiện tại là đã thăm.
+            \item In ra đỉnh hiện tại.
+            \item Thăm tất cả các đỉnh kề chưa được thăm.
+        \end{itemize}
+    \end{enumerate}
+    \item \textbf{Lưu ý:} 
+    \begin{itemize}
+        \item Trong phiên bản iterative, các đỉnh kề được đẩy vào stack theo thứ tự ngược để duy trì thứ tự DFS.
+        \item Đồ thị được coi là vô hướng (undirected), nên mỗi cạnh được thêm vào cả hai chiều.
+    \end{itemize}
+\end{itemize}
+
+\begin{baitoan}
+    Let $G = (V,E)$ be a finite multigraph. Implement the depth-first search on $G$.
+\end{baitoan}
+
+%------------------- Depth-First Search Algorithm for Multigraph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Thực hiện thuật toán duyệt theo chiều sâu (DFS) trên đa đồ thị hữu hạn, cho phép nhiều cạnh giữa hai đỉnh nhưng không có khuyên (loop).
+    \item \textbf{Ý tưởng chính:} DFS vẫn áp dụng được cho multigraph. Khi duyệt các cạnh kề, xét tất cả các cạnh (kể cả trùng lặp) giữa hai đỉnh. Đảm bảo không duyệt lại đỉnh đã thăm.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề, \texttt{adj[u]} chứa tất cả các đỉnh kề với $u$ (có thể lặp lại nếu có nhiều cạnh).
+        \item \texttt{visited}: Mảng boolean để đánh dấu các đỉnh đã được thăm.
+        \item \texttt{stack}: Cấu trúc dữ liệu stack để lưu trữ các đỉnh cần thăm (trong phiên bản iterative).
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh (có thể lặp lại, không cho phép cạnh khuyên $u = v$).
+        \item Nhập đỉnh bắt đầu $start$.
+        \item Khởi tạo mảng \texttt{visited} với tất cả giá trị \texttt{false}.
+        \item Thực hiện DFS bằng hai cách:
+        \begin{itemize}
+            \item \textbf{Đệ quy:} Gọi hàm \texttt{dfs\_recursive} với đỉnh bắt đầu.
+            \begin{itemize}
+                \item \textbf{Cách thức:} 
+                \begin{enumerate}
+                    \item Đánh dấu đỉnh hiện tại là đã thăm.
+                    \item In ra đỉnh hiện tại.
+                    \item Với mỗi đỉnh kề chưa thăm, gọi đệ quy \texttt{dfs\_recursive(adj, visited, neighbor)}.
+                    \item Khi không còn đỉnh kề nào chưa thăm, quay lại (backtrack).
+                \end{enumerate}
+            \end{itemize}
+            \item \textbf{Iterative:} Sử dụng stack trong hàm \texttt{dfs\_iterative}.
+        \end{itemize}
+        \item Trong mỗi bước DFS:
+        \begin{itemize}
+            \item Đánh dấu đỉnh hiện tại là đã thăm.
+            \item In ra đỉnh hiện tại.
+            \item Thăm tất cả các đỉnh kề chưa được thăm.
+        \end{itemize}
+    \end{enumerate}
+    \item \textbf{Lưu ý:} 
+    \begin{itemize}
+        \item Đa đồ thị cho phép nhiều cạnh giữa hai đỉnh, nhưng không cho phép cạnh khuyên ($u = v$).
+        \item Trong phiên bản iterative, các đỉnh kề được đẩy vào stack theo thứ tự ngược để duy trì thứ tự DFS.
+        \item Đồ thị được coi là vô hướng (undirected), nên mỗi cạnh được thêm vào cả hai chiều.
+    \end{itemize}
+\end{itemize}
+
+\begin{baitoan}
+    Let $G = (V,E)$ be a general graph. Implement the depth-first search on $G$.
+\end{baitoan}
+
+%------------------- Depth-First Search Algorithm for General Graph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Thực hiện thuật toán duyệt theo chiều sâu (DFS) trên đồ thị tổng quát (general graph) hữu hạn, cho phép nhiều cạnh giữa hai đỉnh và cho phép cạnh khuyên (loop).
+    \item \textbf{Ý tưởng chính:} DFS vẫn áp dụng được cho general graph. Khi duyệt các cạnh kề, xét tất cả các cạnh (kể cả trùng lặp và cạnh khuyên) giữa hai đỉnh. Đảm bảo không duyệt lại đỉnh đã thăm.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề, \texttt{adj[u]} chứa tất cả các đỉnh kề với $u$ (có thể lặp lại nếu có nhiều cạnh, và có thể có $u = v$ nếu là cạnh khuyên).
+        \item \texttt{visited}: Mảng boolean để đánh dấu các đỉnh đã được thăm.
+        \item \texttt{stack}: Cấu trúc dữ liệu stack để lưu trữ các đỉnh cần thăm (trong phiên bản iterative).
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh (có thể lặp lại và có thể là cạnh khuyên) cùng trọng số.
+        \item Nhập đỉnh bắt đầu $start$.
+        \item Khởi tạo mảng \texttt{visited} với tất cả giá trị \texttt{false}.
+        \item Thực hiện DFS bằng hai cách:
+        \begin{itemize}
+            \item \textbf{Đệ quy:} Gọi hàm \texttt{dfs\_recursive} với đỉnh bắt đầu.
+            \begin{itemize}
+                \item \textbf{Cách thức:} 
+                \begin{enumerate}
+                    \item Đánh dấu đỉnh hiện tại là đã thăm.
+                    \item In ra đỉnh hiện tại.
+                    \item Với mỗi đỉnh kề chưa thăm, gọi đệ quy \texttt{dfs\_recursive(adj, visited, neighbor)}.
+                    \item Khi không còn đỉnh kề nào chưa thăm, quay lại (backtrack).
+                \end{enumerate}
+            \end{itemize}
+            \item \textbf{Iterative:} Sử dụng stack trong hàm \texttt{dfs\_iterative}.
+        \end{itemize}
+        \item Trong mỗi bước DFS:
+        \begin{itemize}
+            \item Đánh dấu đỉnh hiện tại là đã thăm.
+            \item In ra đỉnh hiện tại.
+            \item Thăm tất cả các đỉnh kề chưa được thăm.
+        \end{itemize}
+    \end{enumerate}
+    \item \textbf{Lưu ý:} 
+    \begin{itemize}
+        \item Đồ thị tổng quát cho phép nhiều cạnh giữa hai đỉnh và cho phép cạnh khuyên ($u = v$).
+        \item Trong phiên bản iterative, các đỉnh kề được đẩy vào stack theo thứ tự ngược để duy trì thứ tự DFS.
+        \item Đồ thị được coi là vô hướng (undirected), nên mỗi cạnh được thêm vào cả hai chiều (kể cả cạnh khuyên).
+    \end{itemize}
+\end{itemize}
+
+%------------------------------------------------------------------------------%
+
+\section{Project 5: Shortest Path Problems on Graphs -- Đồ Án 5: Các Bài Toán Tìm Đường Đi Ngắn Nhất Trên Đồ Thị}
+
+%------------------------------------------------------------------------------%
+
+\subsection{Dijkstra's algorithm -- Thuật toán Dijkstra}
+
+\begin{baitoan}
+    Let $G = (V,E)$ be a finite simple graph. Implement the Dijkstra's algorithm to find the shortest path problem on $G$.
+\end{baitoan}
+
+%------------------- Dijkstra's Algorithm C++ Code Explanation -------------------%
+
+% Explanation of the C++ implementation for Dijkstra's algorithm
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Tìm đường đi ngắn nhất từ một đỉnh nguồn đến tất cả các đỉnh còn lại trên đồ thị đơn hữu hạn với trọng số không âm.
+    \item \textbf{Ý tưởng chính:} Sử dụng hàng đợi ưu tiên (priority queue) để luôn chọn đỉnh có khoảng cách tạm thời nhỏ nhất, cập nhật dần dần các khoảng cách ngắn nhất từ nguồn đến các đỉnh.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề (adjacency list), \texttt{adj[u]} chứa các cặp $(v, w)$ với $v$ là đỉnh kề $u$, $w$ là trọng số cạnh $u-v$.
+        \item \texttt{dist}: Mảng lưu khoảng cách ngắn nhất từ nguồn đến mỗi đỉnh, khởi tạo là \texttt{INF} (vô cùng lớn).
+        \item \texttt{priority\_queue}: Hàng đợi ưu tiên kiểu min-heap, luôn lấy ra đỉnh có khoảng cách tạm thời nhỏ nhất.
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh cùng trọng số.
+        \item Nhập đỉnh nguồn $src$.
+        \item Khởi tạo \texttt{dist[src] = 0}, các đỉnh còn lại là \texttt{INF}.
+        \item Đưa $(0, src)$ vào hàng đợi ưu tiên.
+        \item Lặp cho đến khi hàng đợi rỗng:
+        \begin{itemize}
+            \item Lấy ra đỉnh $u$ có khoảng cách tạm thời nhỏ nhất.
+            \item Nếu đã có đường đi ngắn hơn đến $u$, bỏ qua.
+            \item Với mỗi đỉnh kề $v$ của $u$, nếu tìm được đường đi ngắn hơn qua $u$, cập nhật \texttt{dist[v]} và đưa vào hàng đợi.
+        \end{itemize}
+        \item In ra khoảng cách ngắn nhất từ nguồn đến các đỉnh còn lại (nếu không tới được thì in \texttt{INF}).
+    \end{enumerate}
+\end{itemize}
+
+%------------------------------------------------------------------------------%
+\begin{baitoan}
+    Let $G = (V,E)$ be a finite multigraph. Implement the Dijkstra's algorithm to find the shortest path problem on $G$.
+\end{baitoan}
+
+%------------------- Dijkstra's Algorithm for Multigraph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Tìm đường đi ngắn nhất từ một đỉnh nguồn đến tất cả các đỉnh còn lại trên đồ thị đa đồ thị (multigraph) hữu hạn với trọng số không âm, cho phép nhiều cạnh giữa hai đỉnh nhưng không có khuyên (loop).
+    \item \textbf{Ý tưởng chính:} Thuật toán Dijkstra vẫn áp dụng được cho multigraph. Khi duyệt các cạnh kề, xét tất cả các cạnh (kể cả trùng lặp) giữa hai đỉnh.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề, \texttt{adj[u]} chứa tất cả các cặp $(v, w)$ với $v$ là đỉnh kề $u$, $w$ là trọng số cạnh $u-v$ (có thể có nhiều cặp giống nhau nếu có nhiều cạnh).
+        \item \texttt{dist}: Mảng lưu khoảng cách ngắn nhất từ nguồn đến mỗi đỉnh, khởi tạo là \texttt{INF}.
+        \item \texttt{priority\_queue}: Hàng đợi ưu tiên kiểu min-heap.
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh (có thể lặp lại) cùng trọng số. Nếu nhập cạnh khuyên ($u = v$), bỏ qua.
+        \item Nhập đỉnh nguồn $src$.
+        \item Khởi tạo \texttt{dist[src] = 0}, các đỉnh còn lại là \texttt{INF}.
+        \item Đưa $(0, src)$ vào hàng đợi ưu tiên.
+        \item Lặp cho đến khi hàng đợi rỗng:
+        \begin{itemize}
+            \item Lấy ra đỉnh $u$ có khoảng cách tạm thời nhỏ nhất.
+            \item Nếu đã có đường đi ngắn hơn đến $u$, bỏ qua.
+            \item Với mỗi cạnh kề $u-v$ (kể cả trùng lặp), nếu tìm được đường đi ngắn hơn qua $u$, cập nhật \texttt{dist[v]} và đưa vào hàng đợi.
+        \end{itemize}
+        \item In ra khoảng cách ngắn nhất từ nguồn đến các đỉnh còn lại (nếu không tới được thì in \texttt{INF}).
+    \end{enumerate}
+    \item \textbf{Lưu ý:} Đa đồ thị cho phép nhiều cạnh giữa hai đỉnh, nhưng không cho phép cạnh khuyên ($u = v$).
+\end{itemize}
+
+%------------------------------------------------------------------------------%
+\begin{baitoan}
+    Let $G = (V,E)$ be a general graph. Implement the Dijkstra's algorithm to find the shortest path problem on $G$.
+\end{baitoan}
+
+%------------------- Dijkstra's Algorithm for General Graph: C++ Code Explanation -------------------%
+
+\textbf{Code Explanation:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Tìm đường đi ngắn nhất từ một đỉnh nguồn đến tất cả các đỉnh còn lại trên đồ thị tổng quát (general graph) hữu hạn với trọng số không âm, cho phép nhiều cạnh giữa hai đỉnh và cho phép cạnh khuyên (loop).
+    \item \textbf{Ý tưởng chính:} Thuật toán Dijkstra vẫn áp dụng được cho general graph. Khi duyệt các cạnh kề, xét tất cả các cạnh (kể cả trùng lặp và cạnh khuyên) giữa hai đỉnh.
+    \item \textbf{Các biến và cấu trúc chính:}
+    \begin{itemize}
+        \item \texttt{adj}: Danh sách kề, \texttt{adj[u]} chứa tất cả các cặp $(v, w)$ với $v$ là đỉnh kề $u$, $w$ là trọng số cạnh $u-v$ (có thể có nhiều cặp giống nhau nếu có nhiều cạnh, và có thể có $u = v$ nếu là cạnh khuyên).
+        \item \texttt{dist}: Mảng lưu khoảng cách ngắn nhất từ nguồn đến mỗi đỉnh, khởi tạo là \texttt{INF}.
+        \item \texttt{priority\_queue}: Hàng đợi ưu tiên kiểu min-heap.
+    \end{itemize}
+    \item \textbf{Các bước chính:}
+    \begin{enumerate}
+        \item Nhập số đỉnh $n$, số cạnh $m$ và danh sách các cạnh (có thể lặp lại và có thể là cạnh khuyên) cùng trọng số.
+        \item Nhập đỉnh nguồn $src$.
+        \item Khởi tạo \texttt{dist[src] = 0}, các đỉnh còn lại là \texttt{INF}.
+        \item Đưa $(0, src)$ vào hàng đợi ưu tiên.
+        \item Lặp cho đến khi hàng đợi rỗng:
+        \begin{itemize}
+            \item Lấy ra đỉnh $u$ có khoảng cách tạm thời nhỏ nhất.
+            \item Nếu đã có đường đi ngắn hơn đến $u$, bỏ qua.
+            \item Với mỗi cạnh kề $u-v$ (kể cả trùng lặp và cạnh khuyên), nếu tìm được đường đi ngắn hơn qua $u$, cập nhật \texttt{dist[v]} và đưa vào hàng đợi.
+        \end{itemize}
+        \item In ra khoảng cách ngắn nhất từ nguồn đến các đỉnh còn lại (nếu không tới được thì in \texttt{INF}).
+    \end{enumerate}
+    \item \textbf{Lưu ý:} Đồ thị tổng quát cho phép nhiều cạnh giữa hai đỉnh và cho phép cạnh khuyên ($u = v$).
+\end{itemize}
+
+%------------------------------------------------------------------------------%
+\end{document}
