@@ -11,6 +11,7 @@
 \usepackage{multirow}
 \usepackage{amsthm}
 \usepackage{amssymb}
+\usepackage{graphicx}
 \newtheorem{assumption}{Assumption}
 \newtheorem{baitoan}{Bài toán}
 \newtheorem{cauhoi}{Câu hỏi}
@@ -238,102 +239,240 @@
 \end{baitoan}
 
 %------------------- Giải thích thuật toán và code phân hoạch tự liên hợp -------------------%
-
 \textbf{Giải thích và công thức:}
-
 \begin{itemize}
     \item \textbf{Phân hoạch tự liên hợp (self-conjugate partition):}
     
-    Một phân hoạch 
-    \[
-      \boldsymbol\lambda = (\lambda_1,\lambda_2,\dots,\lambda_k),
-      \quad
-      \lambda_1\ge\lambda_2\ge\cdots\ge\lambda_k>0,
-      \;\sum_i\lambda_i=n
-    \]
-    gọi là tự liên hợp nếu sơ đồ Ferrers khi chuyển vị (transpose) vẫn cho lại chính nó, tức là đối xứng qua đường chéo chính.
+    Một phân hoạch của số tự nhiên $n$ là một cách viết $n$ dưới dạng tổng của các số nguyên dương. Ví dụ, $(3,1,1)$ là một phân hoạch của $5$.
+
+    Để trực quan hóa một phân hoạch $\boldsymbol\lambda = (\lambda_1, \lambda_2, \dots, \lambda_k)$, ta dùng \textbf{sơ đồ Ferrers}. Sơ đồ này gồm $k$ hàng, hàng thứ $i$ có $\lambda_i$ dấu sao.
+
+    \textbf{Ví dụ:} Phân hoạch $(4,2,1)$ của $n=7$ có sơ đồ Ferrers:
+    \begin{verbatim}
+    ****
+    **
+    *
+    \end{verbatim}
+
+    \textbf{Phân hoạch liên hợp} (conjugate partition), ký hiệu $\boldsymbol\lambda'$, được tạo ra bằng cách "lật" sơ đồ Ferrers qua đường chéo chính (chuyển hàng thành cột và ngược lại).
+
+    Với $\boldsymbol\lambda = (4,2,1)$, phân hoạch liên hợp $\boldsymbol\lambda' = (3,2,1,1)$ có sơ đồ:
+    \begin{verbatim}
+    ***
+    **
+    *
+    *
+    \end{verbatim}
+
+    Một phân hoạch được gọi là \textbf{tự liên hợp} nếu nó bằng với phân hoạch liên hợp của chính nó, tức là $\boldsymbol\lambda = \boldsymbol\lambda'$. Điều này có nghĩa là sơ đồ Ferrers của nó đối xứng qua đường chéo chính. \textbf{Đường chéo chính} là các ô $(i,i)$ trong sơ đồ, tức là ô thứ $i$ của hàng thứ $i$.
 
     \item \textbf{Đặc trưng:}
-    
-    Khi phân hoạch tự liên hợp, ta nhìn lên Ferrers diagram và đánh dấu dãy độ dài mỗi “nhánh chéo” (hook trên đường chéo chính). Gọi $a_i$ là số ô trên đường chéo chính hàng thứ $i$. Mỗi ô đó kéo ra hai cánh (hàng và cột) cộng thêm chính ô chéo, nên mỗi $a_i$ đóng góp
-    \[
-      2\,a_i - 1
-    \]
-    ô. Vì có các nhánh chéo từ $i=1$ đến $k$, tổng ô bằng
-    \[
-      n \;=\; \sum_{i=1}^k (2\,a_i - 1).
-    \]
-    Ví dụ, với $\boldsymbol a=(3,2,1)$, ta có $n= (2\cdot3-1)+(2\cdot2-1)+(2\cdot1-1)=5+3+1=9$, và Ferrers diagram:
+
+    Một đặc trưng của phân hoạch tự liên hợp là sự tương ứng một-một với \textbf{phân hoạch của $n$ thành các phần lẻ và phân biệt}.
+
+    Ta có thể "bóc" sơ đồ Ferrers của một phân hoạch tự liên hợp thành các "khối hình chữ L" lồng vào nhau, được gọi là các \textbf{gnomon} hoặc \textbf{hook}. Mỗi hook bao gồm ô trên đường chéo chính, các ô bên phải nó (cánh tay) và các ô bên dưới nó (cái chân). Do tính đối xứng, số ô trên cánh tay bằng số ô trên cái chân.
+
+    Gọi $d_i$ là độ dài cạnh của hook thứ $i$. Khi đó, hook thứ $i$ sẽ có $d_i$ ô hàng ngang và $d_i - 1$ ô dọc. Tổng số ô của hook là $2d_i - 1$, luôn là số lẻ.
+
+    \textbf{Ví dụ:} Phân hoạch tự liên hợp $\boldsymbol\lambda = (5,4,3,2,1)$ của $n=15$:
     \begin{verbatim}
-    ***   <- hàng 1 (3 ô)
-    **    <- hàng 2 (2 ô)
-    *     <- hàng 3 (1 ô)
+    *****
+    ****
+    ***
+    **
+    *
     \end{verbatim}
-    Đây là hình đối xứng (self-conjugate).
 
-    \item \textbf{Công thức đệ quy:}
+    \begin{itemize}
+        \item \textbf{Hook ngoài cùng:} gồm hàng 1 và cột 1. Có $d_1 = 5$, tổng số ô là $2d_1 - 1 = 9$.
+        \item Bóc hook này ra, còn lại phân hoạch tự liên hợp $(3,2,1)$ của $n = 15 - 9 = 6$:
+        \begin{verbatim}
+        ***
+        **
+        *
+        \end{verbatim}
+        \item \textbf{Hook thứ hai:} $d_2 = 3 \Rightarrow$ số ô là $2 \cdot 3 - 1 = 5$
+        \item Còn lại phân hoạch $(1)$ của $n=6 - 5 = 1$
+        \item \textbf{Hook cuối cùng:} $d_3 = 1$, số ô là $1$
+    \end{itemize}
 
-    Gọi $p_k^{\rm selfcjg}(n)$ số phân hoạch tự liên hợp của $n$ có $k$ nhánh chéo (tức $k$ phần).  
-    Để xây phân hoạch có $k$ nhánh, ta chọn độ dài nhánh cuối cùng $a_k=i\ge1$, nó chiếm $2i-1$ ô, còn lại $n - i(2\cdot k -1)$ ô và $k-1$ nhánh:
-    \[
-      p_k^{\rm selfcjg}(n)
-      = \sum_{i=1}^{\lfloor n/(2k-1)\rfloor}
-        p_{k-1}^{\rm selfcjg}\bigl(n - i\,(2k-1)\bigr),
-    \]
-    với khởi tạo $p_0^{\rm selfcjg}(0)=1$, còn $p_0^{\rm selfcjg}(n>0)=0$.
+    Như vậy, phân hoạch tự liên hợp $(5,4,3,2,1)$ tương ứng với phân hoạch $15 = 9 + 5 + 1$ gồm các phần lẻ phân biệt.
+
+    Phép tương ứng này là một song ánh (bijection). Do đó, \textbf{số phân hoạch tự liên hợp của $n$ bằng số phân hoạch của $n$ thành các phần lẻ và phân biệt}.
+
+    \item \textbf{Công thức truy hồi cho $p_k^{\rm selfcjg}(n)$:}
+
+    Như đã thiết lập, số phân hoạch tự liên hợp của $n$ có $k$ hook trên đường chéo chính, ký hiệu $p_k^{\rm selfcjg}(n)$, bằng số phân hoạch của $n$ thành $k$ phần lẻ và phân biệt. Ta sẽ xây dựng công thức truy hồi dựa trên tính chất này.
+
+    Gọi một phân hoạch của $n$ thành $k$ phần lẻ, phân biệt là $(h_1, h_2, \dots, h_k)$ với $h_1 > h_2 > \dots > h_k \ge 1$. Ta xét hai trường hợp cho phần nhỏ nhất $h_k$:
+
+    1.  \textbf{Trường hợp 1: Phần nhỏ nhất bằng 1 ($h_k = 1$).}
+        Nếu ta bỏ phần này đi, ta còn lại $k-1$ phần lẻ, phân biệt $(h_1, \dots, h_{k-1})$ có tổng là $n-1$. Các phần này đều lớn hơn 1. Đây chính là một phân hoạch của $n-1$ thành $k-1$ phần lẻ, phân biệt và lớn hơn 1.
+        
+    2.  \textbf{Trường hợp 2: Phần nhỏ nhất lớn hơn 1 ($h_k > 1$).}
+        Vì tất cả các phần $h_i$ đều là số lẻ, nên $h_i \ge 3$. Ta có thể tạo ra một phân hoạch mới bằng cách trừ 2 từ mỗi phần: $(h_1-2, h_2-2, \dots, h_k-2)$. Các phần mới này vẫn là số lẻ, phân biệt, và có phần nhỏ nhất $\ge 1$. Tổng của chúng là $(h_1+\dots+h_k) - 2k = n - 2k$. Đây là một phân hoạch của $n-2k$ thành $k$ phần lẻ, phân biệt.
+        
+    Hai trường hợp này rời nhau và bao quát tất cả các khả năng. Do đó, ta có công thức truy hồi:
+    $$
+        p_k^{\rm selfcjg}(n) = p_k^{\rm selfcjg}(n-2k) + p_{k-1}^{\rm selfcjg}(n-1).
+    $$
+
+    \textbf{Điều kiện cơ sở:}
+    \begin{itemize}
+        \item $p_0^{\rm selfcjg}(0) = 1$ (phân hoạch rỗng).
+        \item $p_k^{\rm selfcjg}(n) = 0$ nếu $n < k^2$ (tổng của $k$ số lẻ phân biệt nhỏ nhất là $1+3+\dots+(2k-1)=k^2$).
+        \item $p_k^{\rm selfcjg}(n) = 0$ nếu $n<0$ hoặc $k<0$.
+    \end{itemize}
 
     \item \textbf{Ý tưởng sinh phân hoạch tự liên hợp:}
 
-    Chúng ta sinh đệ quy với tham số $(n,k,maxVal)$, trong đó $maxVal$ ban đầu đặt bằng $\lfloor n/(2k-1)\rfloor$, rồi mỗi bước:
+    Để sinh một phân hoạch tự liên hợp của $n$ có $k$ hook (ứng với $k$ ô trên đường chéo chính), ta làm như sau:
+
+    \begin{enumerate}
+        \item Tìm tất cả các phân hoạch của $n$ thành đúng $k$ số lẻ và phân biệt. Gọi mỗi phân hoạch là $(h_1, h_2, \dots, h_k)$ với $h_1 > h_2 > \dots > h_k > 0$ và $\sum h_i = n$.
+        \item Với mỗi $h_i$, tính $d_i = (h_i + 1)/2$. Khi đó $d_1 > d_2 > \dots > d_k > 0$.
+        \item Từ dãy $(d_1, \dots, d_k)$, dựng lại phân hoạch tự liên hợp bằng cách lồng các hook vào nhau.
+    \end{enumerate}
+
+    \textbf{Ví dụ:} Tìm các phân hoạch tự liên hợp của $n = 9$.
+
     \begin{itemize}
-        \item Lấy $i$ từ $maxVal$ xuống 1 (đảm bảo thứ tự không tăng).
-        \item Gán $a_k=i$, giảm $n\leftarrow n - i(2k-1)$, $k\leftarrow k-1$, cập nhật $maxVal\leftarrow i$.
-        \item Khi $k=0$ và $n=0$, thu được phân hoạch hợp lệ.
+        \item Phân hoạch $9 = (9)$ $\Rightarrow k=1$ hook, $d_1 = (9+1)/2 = 5$
+        \item Dựng lại phân hoạch: $(5,1,1,1,1)$
+        \begin{verbatim}
+        *****
+        *
+        *
+        *
+        *
+        \end{verbatim}
+
+        \item Phân hoạch $9 = (5,3,1)$ $\Rightarrow k=3$ hook, $d = (3,2,1)$
+        \item Dựng lại phân hoạch: $(3,3,3)$
+        \begin{verbatim}
+        ***
+        ***
+        ***
+        \end{verbatim}
     \end{itemize}
 
-    Vì chúng ta chọn $i$ từ lớn xuống nhỏ, nên luôn giữ được $\;a_1\ge a_2\ge\cdots\ge a_k$.
+    Vậy $n=9$ có 2 phân hoạch tự liên hợp là: $(5,1,1,1,1)$ và $(3,3,3)$.
+
+    \textbf{(i) Phương pháp đệ quy (Backtracking):}
+    \begin{itemize}
+        \item Duyệt tất cả các phân hoạch của $n$ thành $k$ số lẻ phân biệt giảm dần.
+        \item Ở mỗi bước, thử thêm một số lẻ $h$ vào phân hoạch hiện tại sao cho:
+        \begin{itemize}
+            \item $h \le$ số trước đó (để giảm dần),
+            \item $h$ là số lẻ chưa dùng,
+            \item tổng không vượt quá $n$,
+            \item số phần không vượt quá $k$.
+        \end{itemize}
+        \item Nếu tổng đạt $n$ và đủ $k$ phần: chuyển thành phân hoạch tự liên hợp và lưu.
+        \item Cắt nhánh sớm nếu: tổng vượt $n$, số phần vượt $k$, hoặc tổng không thể đạt được do còn lại < $k^2$.
+    \end{itemize}
+    
+    \textbf{(ii) Phương pháp quy hoạch động (Dynamic Programming):}
+    \begin{itemize}
+        \item Dùng bảng $dp[i][j]$ là danh sách các phân hoạch của $i$ thành $j$ số lẻ phân biệt.
+        \item Khởi tạo: $dp[0][0] = \{[]\}$.
+        \item Với mỗi $i$ từ $1$ đến $n$, mỗi $j$ từ $1$ đến $k$:
+        \begin{itemize}
+            \item Nguồn 1: từ $dp[i - 2j][j]$, cộng 2 vào mỗi phần tử trong phân hoạch.
+        
+            Giả sử ta đã có một phân hoạch $P = (a_1, a_2, \dots, a_j)$ của $i - 2j$ thành $j$ số lẻ phân biệt. Nếu ta cộng thêm 2 vào mỗi phần tử, ta được phân hoạch mới $P' = (a_1+2, a_2+2, \dots, a_j+2)$ có tổng là $i$.
+        
+            Vì các $a_i$ là số lẻ phân biệt, nên $a_i + 2$ vẫn là số lẻ và phân biệt. Do đó, $P'$ là một phân hoạch của $i$ thành $j$ số lẻ phân biệt. Ta thu được $dp[i][j]$ từ đây.
+        
+            \item Nguồn 2: từ $dp[i - 1][j - 1]$, thêm phần tử $1$ nếu các phần tử trong phân hoạch đều $> 1$.
+        
+            Giả sử ta có một phân hoạch $Q = (a_1, a_2, \dots, a_{j-1})$ của $i - 1$ thành $j-1$ số lẻ phân biệt. Nếu tất cả $a_i > 1$, ta có thể thêm phần tử $1$ vào để tạo thành phân hoạch $Q' = (a_1, \dots, a_{j-1}, 1)$.
+        
+            Khi đó, $Q'$ là phân hoạch của $i$ thành $j$ phần lẻ phân biệt (do $1$ nhỏ hơn tất cả các phần còn lại, và vẫn giữ phân biệt). Sắp xếp lại theo thứ tự giảm dần nếu cần.
+        \end{itemize}
+
+        Hai nguồn được chia ra là vì chúng phản ánh hai cách xây dựng hoàn toàn khác nhau để tạo ra phân hoạch của $i$ thành $j$ số lẻ phân biệt:
+
+        \begin{itemize}
+            \item \textbf{Nguồn 1 ($dp[i - 2j][j]$):} Dựa trên việc tăng \textit{đồng đều} mỗi phần tử của một phân hoạch có $j$ phần tử lên thêm $2$. Đây là cách \textbf{bảo toàn số lượng phần tử}, và chỉ làm tổng tăng thêm đúng $2j$. Nhờ đó, ta đảm bảo các phần tử vẫn lẻ, vẫn phân biệt, và tổng thành $i$.
+
+            \item \textbf{Nguồn 2 ($dp[i - 1][j - 1]$):} Dựa trên việc \textbf{tăng số lượng phần tử thêm 1} bằng cách thêm phần tử $1$ vào một phân hoạch có $j-1$ phần tử. Tuy nhiên, để giữ phân biệt, ta chỉ được phép thêm $1$ khi phân hoạch cũ không chứa $1$, tức là tất cả các phần tử cũ phải $>1$.
+
+        \end{itemize}
+
+        Việc chia 2 nguồn như vậy giúp bao phủ \textbf{tất cả các trường hợp có thể} để tạo phân hoạch của $i$ thành $j$ số lẻ phân biệt mà không bị trùng và không bỏ sót.
+
+               
+        \item Với mỗi phân hoạch $H$ trong $dp[n][k]$, chuyển sang phân hoạch tự liên hợp như trên.
+    \end{itemize}
+
+    \item \textbf{Ý tưởng đếm số phân hoạch của $n$ có số phần tử là lẻ:}
+
+    Đây là bài toán đếm các phân hoạch $\boldsymbol\lambda = (\lambda_1, \dots, \lambda_k)$ của $n$ sao cho độ dài (số phần tử) $k$ là một số lẻ.
+    
+    \textbf{Phương pháp tiếp cận trực tiếp (Dùng Quy hoạch động):}
+    
+    Cách tiếp cận tự nhiên và hiệu quả nhất để giải quyết bài toán này là trước hết tính số phân hoạch của $n$ thành đúng $k$ phần, ký hiệu là $p(n,k)$, cho mọi $k$ có thể. Sau đó, ta chỉ cần lấy tổng của các giá trị $p(n,k)$ với $k$ là số lẻ.
+    
+    1.  \textbf{Tính $p(n,k)$:} Ta sử dụng công thức truy hồi kinh điển sau:
+        $$
+            p(n,k) = p(n-1, k-1) + p(n-k, k)
+        $$
+        \textit{Giải thích công thức:}
+        Một phân hoạch của $n$ thành $k$ phần có thể thuộc một trong hai loại sau:
+        \begin{itemize}
+            \item \textbf{Loại 1: Có chứa ít nhất một phần tử bằng 1.} Nếu ta bỏ đi một phần tử `1`, ta sẽ còn lại một phân hoạch của số $n-1$ thành $k-1$ phần. Số cách làm như vậy là $p(n-1, k-1)$.
+            \item \textbf{Loại 2: Tất cả các phần tử đều lớn hơn hoặc bằng 2.} Nếu ta trừ 1 từ mỗi phần tử trong $k$ phần này, ta sẽ nhận được một phân hoạch mới của số $n-k$ thành $k$ phần. Số cách làm như vậy là $p(n-k, k)$.
+        \end{itemize}
+        
+    2.  \textbf{Xây dựng bảng giá trị:} Ta có thể dùng quy hoạch động để xây dựng một bảng 2 chiều (ví dụ, `dp[i][j]`) lưu giá trị $p(i,j)$ cho tất cả $1 \le i \le n$ và $1 \le j \le i$.
+        
+        \textbf{Điều kiện cơ sở:}
+        \begin{itemize}
+            \item $p(k,k) = 1$ (phân hoạch $k$ thành $k$ phần chỉ có một cách: $1+1+\dots+1$).
+            \item $p(n,1) = 1$ (phân hoạch $n$ thành 1 phần chỉ có một cách: chính là $n$).
+            \item $p(n,k) = 0$ nếu $k>n$.
+            \item $p(n,k) = 0$ nếu $n \le 0$ hoặc $k \le 0$, trừ $p(0,0)=1$.
+        \end{itemize}
+    
+    3.  \textbf{Tính tổng cuối cùng:} Sau khi bảng `dp[n][k]` đã được điền đầy đủ, số phân hoạch của $n$ có số phần tử là lẻ được tính bằng tổng:
+        $$
+            S = \sum_{j=0}^{\lfloor (n-1)/2 \rfloor} p(n, 2j+1) = p(n,1) + p(n,3) + p(n,5) + \dots
+        $$
 
     \item \textbf{So sánh với phân hoạch có lẻ phần:}
 
-    \emph{Định lý cổ điển:} Số phân hoạch tự liên hợp của $n$ bằng số phân hoạch của $n$ có \emph{số phần lẻ}.  
+    Cần phân biệt rõ số phân hoạch của $n$ có lẻ phần, và số phân hoạch của $n$ có lẻ phần phân biệt.
 
-    \textbf{Chứng minh ngắn:}  
-    - Mỗi phân hoạch tự liên hợp có Ferrers diagram đối xứng.  
-    - Nếu ta cắt Ferrers diagram thành đường chéo chính, hai nửa trên-dưới đối xứng và có cùng số phần. Chuyển đổi đó cho ra một phân hoạch có số phần lẻ (các hàng phía trên chéo).  
-    - Ngược lại, từ phân hoạch có lẻ phần, ta ghép hai nửa đối xứng để được self-conjugate.  
-
-    Ví dụ với $n=5$:
-    \begin{verbatim}
-    Self-conjugate:      Odd-parts partition:
+    \textbf{Ví dụ:} Xét $n=5$:
     
-     * * *               * * *
-     *                   *
-     *                   *
-    
-     đây là (3,1,1)       đây là 3+1+1 (3 phần lẻ)
-    \end{verbatim}
+    \begin{itemize}
+        \item Phân hoạch tự liên hợp: chỉ có $(3,1,1)$, tương ứng với hook có $h = (5)$ $\Rightarrow$ có \textbf{1} phân hoạch.
+        \item Phân hoạch của 5 thành các phần lẻ:
+        \begin{enumerate}
+            \item $(5)$
+            \item $(3,1,1)$
+            \item $(1,1,1,1,1)$
+        \end{enumerate}
+        Tổng cộng \textbf{3} phân hoạch.
+    \end{itemize}
 
-    Cả hai đều có đúng 3 hàng (3 phần), nên số lượng song hành.
+    Rõ ràng: $1 \ne 3$. Vì vậy, \textbf{số phân hoạch tự liên hợp} của $n$ không bằng số phân hoạch của $n$ thành các phần lẻ nói chung, mà bằng số phân hoạch có các phần \emph{vừa lẻ, vừa phân biệt}.
 \end{itemize}
 
 \textbf{Giải thích code:}
 
 \begin{itemize}
-    \item \textbf{C++/Python:} Hai chương trình đều dùng đệ quy để sinh các phân hoạch tự liên hợp, kiểm tra tổng và số phần.
     \item \textbf{Các biến quan trọng:}
     \begin{itemize}
-        \item $n, k$: số cần phân hoạch và số phần.
-        \item \texttt{current}: vector/list lưu dãy $a_i$ hiện tại.
-        \item \texttt{result}: vector/list chứa các phân hoạch hợp lệ.
-        \item \texttt{min\_val}: giá trị nhỏ nhất có thể chọn cho phần tiếp theo (đảm bảo không tăng).
-    \end{itemize}
-    \item \textbf{Đếm số phân hoạch lẻ phần:} Dùng đệ quy sinh tất cả phân hoạch của $n$, đếm số phân hoạch có số phần lẻ.
-    \item \textbf{Quy hoạch động:} Dùng mảng 2 chiều $dp[n][k]$ với $dp[0][0]=1$, cập nhật theo công thức đệ quy ở trên.
-\end{itemize}
-
-\textbf{Ví dụ:} $n=7, k=2$
-\begin{itemize}
-    \item Các phân hoạch tự liên hợp: $(3,2)$ vì $3\times1 + 2\times3 = 3+6=9$ (không hợp lệ), $(2,1)$ vì $2\times1 + 1\times3 = 2+3=5$ (không hợp lệ), ...
+        \item \texttt{n, k}: tổng cần phân hoạch và số hook (số phần trên đường chéo chính).
+        \item \texttt{current}, \texttt{curr}: vector tạm lưu dãy các số lẻ phân biệt khi sinh đệ quy.
+        \item \texttt{odd\_parts}: vector chứa tất cả phân hoạch lẻ phân biệt tìm được.
+        \item \texttt{max\_val}: giá trị lẻ lớn nhất còn có thể chọn cho phần tử kế tiếp.
+        \item \texttt{rec\_cnt}: kết quả đếm tự liên hợp bằng \emph{đệ quy}.
+        \item \texttt{dp}: bảng DP với \texttt{dp[sum][parts]} = số phân hoạch tự liên hợp của \texttt{sum} thành \texttt{parts} hook.
+        \item \texttt{dp\_cnt}: kết quả đếm tự liên hợp bằng \emph{quy hoạch động}.
+    \end{itemize}    
 \end{itemize}
 
 %------------------- Hết giải thích phân hoạch tự liên hợp -------------------%
@@ -346,9 +485,496 @@
 \end{baitoan}
 Sẽ có $3A_4^3 + A_3^2 = 36 + 6 = 42$ converter programs.
 
+%------------------- Giải thích thuật toán và code chuyển đổi biểu diễn đồ thị đơn -------------------%
+
+\textbf{(a) Giải thích thuật toán chuyển đổi biểu diễn đồ thị đơn:}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Chuyển đổi giữa 4 dạng biểu diễn đồ thị đơn (undirected simple graph): adjacency matrix, adjacency list, extended adjacency list, adjacency map.
+    \item \textbf{Đồ thị đơn:} Đồ thị không có cạnh song song và không có khuyên (self-loop), mỗi cặp đỉnh có tối đa 1 cạnh nối.
+    \item \textbf{4 dạng biểu diễn:}
+    \begin{itemize}
+        \item \textbf{Adjacency Matrix (AM):} Ma trận $n \times n$ với $A[i][j] = 1$ nếu có cạnh $(i,j)$, $A[i][j] = 0$ nếu không có cạnh.
+        \item \textbf{Adjacency List (AL):} Mảng $n$ danh sách, mỗi danh sách chứa các đỉnh kề với đỉnh tương ứng.
+        \item \textbf{Extended Adjacency List (EAL):} Gồm danh sách các cạnh, danh sách incoming edges và outgoing edges cho mỗi đỉnh.
+        \item \textbf{Adjacency Map (AMap):} Dictionary với key là đỉnh, value là dictionary chứa các cạnh incoming và outgoing.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Công thức chuyển đổi:}
+
+\begin{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Matrix:}
+    \begin{itemize}
+        \item AL $\to$ AM: Với mỗi đỉnh $i$ và mỗi đỉnh kề $j$ trong danh sách kề của $i$: $A[i][j] = 1$
+        \item AM $\to$ AL: Với mỗi cặp $(i,j)$ mà $A[i][j] = 1$: thêm $j$ vào danh sách kề của $i$
+    \end{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Extended Adjacency List:}
+    \begin{itemize}
+        \item AL $\to$ EAL: Thu thập tất cả các cạnh $(u,v)$ với $u \leq v$, xây dựng danh sách edges, incoming và outgoing
+        \item EAL $\to$ AL: Với mỗi cạnh $(u,v)$ trong danh sách edges: thêm $v$ vào danh sách kề của $u$ và ngược lại
+    \end{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item AL $\to$ AMap: Với mỗi cạnh $(u,v)$ với $u \leq v$: thêm mapping vào outgoing và incoming dictionaries
+        \item AMap $\to$ AL: Duyệt qua tất cả các cạnh trong outgoing dictionaries và thêm vào danh sách kề
+    \end{itemize}
+    \item \textbf{Adjacency Matrix $\leftrightarrow$ Extended Adjacency List:}
+    \begin{itemize}
+        \item AM $\to$ EAL: Thu thập tất cả các cạnh $(u,v)$ với $u \leq v$ từ ma trận, xây dựng danh sách edges, incoming và outgoing
+        \item EAL $\to$ AM: Với mỗi cạnh $(u,v)$ trong danh sách edges: $A[u][v] = A[v][u] = 1$
+    \end{itemize}
+    \item \textbf{Adjacency Matrix $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item AM $\to$ AMap: Với mỗi cạnh $(u,v)$ với $u \leq v$: thêm mapping vào outgoing và incoming dictionaries
+        \item AMap $\to$ AM: Duyệt qua tất cả các cạnh trong outgoing dictionaries và đặt $A[u][v] = A[v][u] = 1$
+    \end{itemize}
+    \item \textbf{Extended Adjacency List $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item EAL $\to$ AMap: Với mỗi cạnh $(u,v)$ trong danh sách edges: thêm mapping vào outgoing và incoming dictionaries
+        \item AMap $\to$ EAL: Thu thập các cạnh duy nhất từ outgoing dictionaries, xây dựng danh sách edges, incoming và outgoing
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Biến số quan trọng:}
+    \begin{itemize}
+        \item $n$: số lượng đỉnh của đồ thị
+        \item $m$: số lượng cạnh của đồ thị
+        \item \texttt{adj\_list}: danh sách kề, \texttt{adj\_list[i]} chứa các đỉnh kề với đỉnh $i$
+        \item \texttt{matrix}: ma trận kề $n \times n$, \texttt{matrix[i][j]} = true nếu có cạnh $(i,j)$
+        \item \texttt{ext\_list}: extended adjacency list với danh sách incoming/outgoing edges
+        \item \texttt{adj\_map}: adjacency map với dictionary cho incoming/outgoing edges
+    \end{itemize}
+    \item \textbf{Đọc input:} Dòng đầu: $n$ $m$, sau đó $m$ dòng mỗi dòng chứa 2 số $u$ $v$ biểu diễn cạnh $(u,v)$
+    \item \textbf{Menu tương tác:} Cho phép người dùng chọn loại chuyển đổi và hiển thị kết quả
+\end{itemize}
+
+\textbf{Ý nghĩa các biến chính:}
+
+\begin{itemize}
+    \item \texttt{AdjacencyMatrix.matrix[i][j]}: Biểu diễn có cạnh từ đỉnh $i$ đến đỉnh $j$ hay không
+    \item \texttt{AdjacencyList.adj[i]}: Danh sách các đỉnh kề với đỉnh $i$
+    \item \texttt{ExtendedAdjacencyList.edges}: Danh sách tất cả các cạnh của đồ thị
+    \item \texttt{ExtendedAdjacencyList.outgoing[i]}: Chỉ số các cạnh đi ra từ đỉnh $i$
+    \item \texttt{ExtendedAdjacencyList.incoming[i]}: Chỉ số các cạnh đi vào đỉnh $i$
+    \item \texttt{AdjacencyMap.outgoing[i][j]}: Cạnh $(i,j)$ đi ra từ đỉnh $i$
+    \item \texttt{AdjacencyMap.incoming[i][j]}: Cạnh $(j,i)$ đi vào đỉnh $i$
+\end{itemize}
+
+%------------------- Hết giải thích chuyển đổi biểu diễn đồ thị đơn -------------------%
+
+%------------------- Giải thích thuật toán và code chuyển đổi biểu diễn đa đồ thị -------------------%
+
+\textbf{(b) Giải thích thuật toán chuyển đổi biểu diễn đa đồ thị (multigraph):}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Chuyển đổi giữa 4 dạng biểu diễn đa đồ thị (multigraph): adjacency matrix, adjacency list, extended adjacency list, adjacency map.
+    \item \textbf{Đa đồ thị:} Đồ thị cho phép nhiều cạnh giữa cùng một cặp đỉnh (parallel edges), nhưng không cho phép khuyên (self-loop).
+    \item \textbf{4 dạng biểu diễn:}
+    \begin{itemize}
+        \item \textbf{Adjacency Matrix (AM):} Ma trận $n \times n$ với $A[i][j]$ là số lượng cạnh giữa $i$ và $j$ (không phải chỉ 0/1 như đồ thị đơn).
+        \item \textbf{Adjacency List (AL):} Mỗi đỉnh $i$ có một danh sách, mỗi phần tử là một đỉnh kề $j$ (có thể lặp lại nếu có nhiều cạnh giữa $i$ và $j$).
+        \item \textbf{Extended Adjacency List (EAL):} Danh sách các cạnh (mỗi cạnh là cặp $(u,v)$), và với mỗi đỉnh $i$ có danh sách các chỉ số cạnh đi ra (outgoing) và đi vào (incoming).
+        \item \textbf{Adjacency Map (AMap):} Dictionary với key là đỉnh, value là dictionary chứa các cạnh incoming và outgoing, mỗi cạnh là một tuple $(u,v)$, cho phép nhiều cạnh giống nhau.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Công thức chuyển đổi:}
+
+\begin{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Matrix:}
+    \begin{itemize}
+        \item AL $\to$ AM: Với mỗi đỉnh $i$, với mỗi $j$ trong danh sách kề của $i$, tăng $A[i][j]$ lên 1.
+        \item AM $\to$ AL: Với mỗi cặp $(i,j)$, thêm $A[i][j]$ lần $j$ vào danh sách kề của $i$.
+    \end{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Extended Adjacency List:}
+    \begin{itemize}
+        \item AL $\to$ EAL: Với mỗi $i$, mỗi $j$ trong danh sách kề của $i$ ($i \leq j$), thêm cạnh $(i,j)$ vào danh sách cạnh (mỗi lần xuất hiện là một cạnh riêng biệt).
+        \item EAL $\to$ AL: Với mỗi cạnh $(u,v)$ trong danh sách cạnh, thêm $v$ vào danh sách kề của $u$ và $u$ vào danh sách kề của $v$.
+    \end{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item AL $\to$ AMap: Với mỗi $i$, mỗi $j$ trong danh sách kề của $i$ ($i \leq j$), thêm cạnh $(i,j)$ vào outgoing của $i$ và incoming của $j$ (và ngược lại nếu $i \neq j$).
+        \item AMap $\to$ AL: Duyệt qua tất cả các cạnh trong outgoing, thêm vào danh sách kề.
+    \end{itemize}
+    \item \textbf{Adjacency Matrix $\leftrightarrow$ Extended Adjacency List:}
+    \begin{itemize}
+        \item AM $\to$ EAL: Với mỗi cặp $(i,j)$ ($i \leq j$), thêm $A[i][j]$ cạnh $(i,j)$ vào danh sách cạnh.
+        \item EAL $\to$ AM: Với mỗi cạnh $(u,v)$ trong danh sách cạnh, tăng $A[u][v]$ và $A[v][u]$ lên 1.
+    \end{itemize}
+    \item \textbf{Adjacency Matrix $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item AM $\to$ AMap: Với mỗi cặp $(i,j)$ ($i \leq j$), thêm $A[i][j]$ cạnh $(i,j)$ vào outgoing của $i$ và incoming của $j$ (và ngược lại nếu $i \neq j$).
+        \item AMap $\to$ AM: Duyệt qua tất cả các cạnh trong outgoing, tăng $A[u][v]$ và $A[v][u]$ lên 1.
+    \end{itemize}
+    \item \textbf{Extended Adjacency List $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item EAL $\to$ AMap: Với mỗi cạnh $(u,v)$ trong danh sách cạnh, thêm vào outgoing của $u$ và incoming của $v$ (và ngược lại nếu $u \neq v$).
+        \item AMap $\to$ EAL: Duyệt qua tất cả các cạnh trong outgoing, thu thập thành danh sách cạnh.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Biến số quan trọng:}
+    \begin{itemize}
+        \item $n$: số lượng đỉnh của đồ thị
+        \item $m$: số lượng cạnh của đồ thị (tổng số cạnh, kể cả song song)
+        \item \texttt{adj\_list}: danh sách kề, \texttt{adj\_list[i]} chứa các đỉnh kề với đỉnh $i$ (có thể lặp lại)
+        \item \texttt{matrix}: ma trận $n \times n$, \texttt{matrix[i][j]} là số lượng cạnh giữa $i$ và $j$
+        \item \texttt{ext\_list}: extended adjacency list với danh sách cạnh, incoming/outgoing
+        \item \texttt{adj\_map}: adjacency map với dictionary cho incoming/outgoing edges (mỗi cạnh là một tuple, cho phép trùng lặp)
+    \end{itemize}
+    \item \textbf{Đọc input:} Dòng đầu: $n$ $m$, sau đó $m$ dòng mỗi dòng chứa 2 số $u$ $v$ biểu diễn cạnh $(u,v)$ (có thể lặp lại, không cho phép $u = v$)
+    \item \textbf{Menu tương tác:} Cho phép người dùng chọn loại chuyển đổi và hiển thị kết quả, kiểm tra hợp lệ như phần đồ thị đơn.
+\end{itemize}
+
+\textbf{Ý nghĩa các biến chính:}
+
+\begin{itemize}
+    \item \texttt{AdjacencyMatrix.matrix[i][j]}: Số lượng cạnh giữa $i$ và $j$
+    \item \texttt{AdjacencyList.adj[i]}: Danh sách các đỉnh kề với đỉnh $i$ (có thể lặp lại)
+    \item \texttt{ExtendedAdjacencyList.edges}: Danh sách tất cả các cạnh (mỗi cạnh là một tuple $(u,v)$, có thể trùng lặp)
+    \item \texttt{ExtendedAdjacencyList.outgoing[i]}: Chỉ số các cạnh đi ra từ đỉnh $i$
+    \item \texttt{ExtendedAdjacencyList.incoming[i]}: Chỉ số các cạnh đi vào đỉnh $i$
+    \item \texttt{AdjacencyMap.outgoing[i]}: Danh sách các cạnh đi ra từ $i$ (có thể trùng lặp)
+    \item \texttt{AdjacencyMap.incoming[i]}: Danh sách các cạnh đi vào $i$ (có thể trùng lặp)
+\end{itemize}
+
+%------------------- Hết giải thích chuyển đổi biểu diễn đa đồ thị -------------------%
+
 \begin{baitoan}
     Làm Problems 1.1--1.6 \& Exercises 1.1--1.10
 \end{baitoan}
+
+\textbf{Problem 1.1}
+
+\textbf{Determine the size of the complete graph $K_n$ on $n$ vertices and the complete bipartite graph $K_{p,q}$ on $p + q$ vertices.}
+
+\textbf{Definitions}
+
+\begin{itemize}
+    \item A \textbf{complete graph} $K_n$ is a simple undirected graph in which every pair of distinct vertices is connected by a unique edge.
+    \item A \textbf{complete bipartite graph} $K_{p,q}$ is a bipartite graph whose vertex set is partitioned into two disjoint sets with $p$ and $q$ vertices respectively, and where every vertex in the first set is connected to every vertex in the second set.
+\end{itemize}
+
+\textbf{Solution}
+
+\begin{itemize}
+    \item The size of a graph refers to the number of edges it contains.
+    
+    \item For the complete graph $K_n$, each pair of $n$ vertices is connected by an edge. The number of such pairs is given by the binomial coefficient:
+    \[
+    \text{Size of } K_n = \binom{n}{2} = \frac{n(n-1)}{2}
+    \]
+
+    \item For the complete bipartite graph $K_{p,q}$, each of the $p$ vertices in the first set is connected to each of the $q$ vertices in the second set. Thus, the number of edges is:
+    \[
+    \text{Size of } K_{p,q} = p \cdot q
+    \]
+\end{itemize}
+
+\textbf{Problem 1.2}
+
+\textbf{Determine the values of $n$ for which the circle graph $C_n$ on $n$ vertices is bipartite, and also the values of $n$ for which the complete graph $K_n$ is bipartite.}
+
+\textbf{Definitions}
+
+\begin{itemize}
+    \item A graph is called \textbf{bipartite} if its vertex set can be divided into two disjoint sets such that no two vertices within the same set are adjacent.
+    \item A \textbf{cycle graph} $C_n$ is a graph that consists of a single cycle through $n$ vertices.
+    \item A \textbf{complete graph} $K_n$ is a graph in which every pair of distinct vertices is connected by a unique edge.
+\end{itemize}
+
+\textbf{Solution}
+
+\begin{itemize}
+    \item For the cycle graph $C_n$:
+    \begin{itemize}
+        \item A cycle is bipartite if and only if it has an even number of vertices.
+        \item This is because an odd cycle forces a vertex to connect to another in the same partition, violating the bipartite condition.
+        \item \textbf{Therefore, $C_n$ is bipartite if and only if $n$ is even.}
+    \end{itemize}
+    
+    \item For the complete graph $K_n$:
+    \begin{itemize}
+        \item In a bipartite graph, there are no edges between vertices of the same partition.
+        \item In $K_n$, every vertex is connected to every other vertex, so the only way for $K_n$ to be bipartite is if no two vertices within the same set are connected.
+        \item This is only possible when $n = 2$.
+        \item \textbf{Therefore, $K_n$ is bipartite if and only if $n = 2$.}
+    \end{itemize}
+\end{itemize}
+
+\textbf{Problem 1.3}
+
+\textbf{Give all the spanning trees of the graph in Fig. 1.30, and also the number of spanning trees of the underlying undirected graph.}
+
+\textbf{Definitions}
+
+\begin{itemize}
+    \item A \textbf{spanning tree} of a graph is a subgraph that:
+    \begin{itemize}
+        \item includes all the vertices of the original graph,
+        \item is a tree (i.e., connected and acyclic),
+        \item and has exactly $n - 1$ edges if the graph has $n$ vertices.
+    \end{itemize}
+
+    \item The \textbf{underlying undirected graph} of a directed graph is obtained by replacing each directed edge with an undirected edge, ignoring the direction.
+\end{itemize}
+
+\textbf{Given Graph (Fig. 1.30)}\\
+\includegraphics[width=0.4\textwidth]{Fig_1_30.png}
+
+\textbf{Vertices}: $v_1, v_2, v_3, v_4, v_5, v_6, v_7$
+
+\textbf{Edges in the undirected version}:
+\[
+\begin{aligned}
+&v_1 - v_2,\quad v_1 - v_3,\quad v_1 - v_4,\quad v_2 - v_4,\quad v_2 - v_5, \quad v_1 - v_6, \\
+&v_3 - v_6,\quad v_4 - v_6,\quad v_4 - v_7,\quad v_5 - v_7,\quad v_6 - v_7, \quad v_2 - v_7
+\end{aligned}
+\]
+
+There are $7$ vertices and $12$ edges in the undirected version. A spanning tree of this graph will have exactly $6$ edges and no cycles.
+
+\textbf{Solution}
+
+Spanning tree of the graph in Fig. 1.30:
+\begin{align*}
+    T_1 &= \{ \{v_1 \to v_2\}, \{v_2 \to v_5\}, \{v_5 \to v_7\}, \{v_1 \to v_3\}, \{v_3 \to v_6\}, \{v_1 \to v_4\} \} \\
+    T_2 &= \{ \{v_1 \to v_2\}, \{v_2 \to v_5\}, \{v_5 \to v_7\}, \{v_1 \to v_3\}, \{v_3 \to v_6\}, \{v_2 \to v_4\} \} \\
+    T_3 &= \{ \{v_1 \to v_4\}, \{v_4 \to v_7\}, \{v_7 \to v_2\}, \{v_1 \to v_3\}, \{v_3 \to v_6\}, \{v_2 \to v_5\} \} \\
+    T_4 &= \{ \{v_1 \to v_4\}, \{v_4 \to v_7\}, \{v_1 \to v_2\}, \{v_1 \to v_3\}, \{v_3 \to v_6\}, \{v_2 \to v_5\} \} \\
+    T_5 &= \{ \{v_1 \to v_3\}, \{v_6 \to v_1\}, \{v_1 \to v_4\}, \{v_4 \to v_7\}, \{v_7 \to v_2\}, \{v_2 \to v_5\} \} \\
+    T_6 &= \{ \{v_1 \to v_3\}, \{v_6 \to v_1\}, \{v_1 \to v_4\}, \{v_2 \to v_4\}, \{v_7 \to v_2\}, \{v_5 \to v_7\} \} \\
+    T_7 &= \{ \{v_1 \to v_3\}, \{v_6 \to v_1\}, \{v_7 \to v_6\}, \{v_7 \to v_2\}, \{v_2 \to v_5\}, \{v_2 \to v_4\} \} \\
+    T_8 &= \{ \{v_1 \to v_3\}, \{v_6 \to v_1\}, \{v_7 \to v_6\}, \{v_7 \to v_2\}, \{v_2 \to v_5\}, \{v_1 \to v_4\} \} \\
+\end{align*}
+
+\begin{verbatim}
+    import networkx as nx
+    
+    G = nx.Graph()
+    edges = [
+        (1, 2), (1, 3), (1, 4),
+        (2, 4), (2, 5), (3, 6),
+        (4, 6), (4, 7), (5, 7), (6, 7)
+    ]
+    G.add_edges_from(edges)
+    
+    n_spanning_trees = nx.number_of_spanning_trees(G)
+    print(n_spanning_trees)
+\end{verbatim}
+
+Using the code above, we can get the number of spanning trees of the underlying undirected graph in Fig. 1.30 is \textbf{288}.
+
+\textbf{Explanation of \texttt{number\_of\_spanning\_trees()}}
+
+The function \texttt{networkx.number\_of\_spanning\_trees(G)} returns the total number of distinct spanning trees of a connected undirected graph \( G \). 
+
+Internally, it applies the \textbf{Matrix-Tree Theorem}, which states:
+
+\begin{quote}
+The number of spanning trees of a graph is equal to any cofactor (i.e., determinant of a minor) of its Laplacian matrix.
+\end{quote}
+
+Given a graph \( G \) with \( n \) vertices, the Laplacian matrix \( L \) is defined as:
+\[
+L = D - A
+\]
+where:
+\begin{itemize}
+    \item \( D \) is the degree matrix (a diagonal matrix where \( D_{ii} \) is the degree of vertex \( v_i \)),
+    \item \( A \) is the adjacency matrix of the graph.
+\end{itemize}
+
+To compute the number of spanning trees, one row and the corresponding column are removed from \( L \), and the determinant of the resulting \((n-1) \times (n-1)\) matrix is taken.
+
+This value is guaranteed to be an integer for any connected undirected graph.
+
+\textbf{Problem 1.4}
+
+\textbf{Extend the adjacency matrix graph representation by replacing those operations having an edge as argument or giving an edge or a list of edges as result, by corresponding operations having as argument or giving as result the source and target vertices of the edge or edges.}
+
+\textbf{Explanation:}
+
+In many graph libraries, edge-based operations are defined using edge objects or identifiers. However, when using an adjacency matrix representation, edges are naturally represented by ordered pairs of vertices \((v, w)\) such that the matrix entry \(A[v][w] = 1\). Therefore, we can extend and redefine these operations directly in terms of vertex pairs:
+
+\begin{itemize}
+    \item \texttt{G.del\_edge(e)} $\Rightarrow$ \texttt{G.del\_edge(v, w)} \\
+    Deletes the edge from vertex \(v\) to vertex \(w\) by setting \(A[v][w] := 0\).
+
+    \item \texttt{G.edges()} $\Rightarrow$ return all pairs \((v, w)\) such that \(A[v][w] = 1\) \\
+    Returns the set of all edges as vertex pairs.
+
+    \item \texttt{G.incoming(v)} $\Rightarrow$ return all \(u\) such that \(A[u][v] = 1\) \\
+    Returns all vertices that have an edge going into vertex \(v\).
+
+    \item \texttt{G.outgoing(v)} $\Rightarrow$ return all \(w\) such that \(A[v][w] = 1\) \\
+    Returns all vertices that are targets of edges going out from vertex \(v\).
+
+    \item \texttt{G.source(e)} $\Rightarrow$ extract \(v\) from edge \((v, w)\) \\
+    The source of the edge is simply the first vertex of the pair.
+
+    \item \texttt{G.target(e)} $\Rightarrow$ extract \(w\) from edge \((v, w)\) \\
+    The target of the edge is the second vertex of the pair.
+\end{itemize}
+
+\textbf{Problem 1.5}
+
+\textbf{Extend the first-child, next-sibling tree representation, in order to support the operations} \texttt{T.root()}, \texttt{T.number\_of\_children(v)}, \texttt{T.children(v)} \textbf{in} $\mathcal{O}(1)$ \textbf{time}.
+
+\textbf{Solution:}
+
+We augment the traditional first-child, next-sibling (FCNS) tree structure by storing additional information in each node and in the tree structure itself.
+
+\begin{itemize}
+    \item \texttt{T.root()}: Maintain a direct reference to the root node in the tree object \texttt{T}. Accessing the root is then a simple pointer dereference and takes constant time.
+
+    \item \texttt{T.number\_of\_children(v)}: Add a field \texttt{v.num\_children} in each node \texttt{v}, which is incremented or decremented whenever a child is added or removed. This allows the number of children to be returned in constant time.
+
+    \item \texttt{T.children(v)}: In addition to \texttt{v.first\_child} and \texttt{v.next\_sibling}, maintain a separate list or array \texttt{v.children[]} storing direct references to all of \texttt{v}'s children. This allows for immediate access to all children in $\mathcal{O}(1)$ time if the list is directly returned (not iterated over).
+\end{itemize}
+
+\textbf{Trade-off:}  
+These enhancements increase the space complexity and require careful maintenance of the extra fields during updates (insertions, deletions). However, they provide significant performance improvements for child-related queries.
+
+\textbf{Problem 1.6}
+
+\textbf{Show how to double check that the graph-based representation of a tree is indeed a tree, in time linear in the size of the tree.}
+
+To verify that a graph-based representation indeed corresponds to a valid tree, we perform the following checks in $O(n)$ time, where $n$ is the number of nodes in the graph:
+
+\begin{enumerate}
+    \item \textbf{Check for exactly one root node.}
+    
+    A root node is defined as a node with no incoming edges. We iterate through all nodes and count how many satisfy this condition:
+    \[
+    \text{root\_count} \gets 0
+    \]
+    \[
+    \text{for each } v \in T.vertices(): \quad \text{if } T.incoming(v).empty(): \quad \text{root\_count} \gets \text{root\_count} + 1
+    \]
+    If $\text{root\_count} \ne 1$, the structure is not a valid tree.
+
+    \item \textbf{Check that every non-root node has exactly one parent.}
+    
+    For each node $v$ with incoming edges, we ensure:
+    \[
+    \text{if } \neg T.incoming(v).empty(), \text{ then } T.incoming(v).size() = 1
+    \]
+    This guarantees that every node except the root has exactly one parent.
+
+    \item \textbf{Check for connectivity and absence of cycles using DFS.}
+    
+    We perform a depth-first search (DFS) from the root node and:
+    \begin{itemize}
+        \item Mark each visited node to avoid revisiting.
+        \item If a node is visited more than once, a cycle exists.
+        \item If some nodes are not visited after DFS, the graph is disconnected.
+    \end{itemize}
+
+    \textit{Pseudocode:}
+    \begin{verbatim}
+visited = empty set
+
+function DFS(v):
+    if v in visited:
+        return False  # cycle detected
+    visited.add(v)
+    for u in T.children(v):
+        if not DFS(u):
+            return False
+    return True
+    \end{verbatim}
+
+    After DFS:
+    \[
+    \text{if } |\text{visited}| \ne T.number\_of\_nodes(), \text{ the structure is not connected.}
+    \]
+\end{enumerate}
+
+\noindent
+Since each operation (checking incoming/outgoing edges, DFS traversal) takes constant or linear time over all nodes and edges, the total verification process runs in $O(n)$ time.
+
+\textbf{Exercise 1.1: The standard representation of an undirected graph in the format adopted for the DIMACS Implementation Challenges consists of a problem definition line of the form \texttt{p edge n m}, where $n$ and $m$ are, respectively, the number of vertices and the number of edges, followed by $m$ edge descriptor lines of the form \texttt{e i j}, each of them giving an edge as a pair of vertex numbers in the range $1$ to $n$. Comment lines of the form \texttt{c …} are also allowed. Implement procedures to read a DIMACS graph and to write a graph in DIMACS format.}
+
+The DIMACS format represents an undirected graph in a standardized way:
+\begin{itemize}
+    \item Comment lines start with \texttt{c} and can be ignored.
+    \item A line starting with \texttt{p edge n m} defines the number of vertices ($n$) and edges ($m$).
+    \item Each subsequent line starting with \texttt{e i j} defines an undirected edge between vertex $i$ and vertex $j$.
+\end{itemize}
+
+To handle this format, we implement two procedures:
+
+\textbf{Reading a DIMACS graph}
+We read each line of the input file:
+\begin{itemize}
+    \item Skip lines starting with \texttt{c}.
+    \item Parse the line \texttt{p edge n m} to get the number of vertices and edges.
+    \item Parse each edge line \texttt{e u v} and store the edges as pairs $(u,v)$.
+\end{itemize}
+
+\textbf{Writing a DIMACS graph}
+To output a graph in DIMACS format:
+\begin{itemize}
+    \item Print the line \texttt{p edge n m}, where $m$ is the number of edges.
+    \item For each edge $(u, v)$, write the line \texttt{e u v}.
+\end{itemize}
+
+\textbf{Exercise 1.2: The external representation of a graph in the Stanford GraphBase (SGB) format consists essentially of a first line of the form \texttt{* GraphBase graph (utiltypes …,nV,mA)}, where $n$ and $m$ are, respectively, the number of vertices and the number of edges; a second line containing an identification string; a \texttt{* Vertices} line; $n$ vertex descriptor lines of the form \texttt{label,Ai,0,0}, where $i$ is the number of the first edge in the range $0$ to $m - 1$ going out of the vertex and \texttt{label} is a string label; an \texttt{* Arcs} line; $m$ edge descriptor lines of the form \texttt{V j,Ai,label,0}, where $j$ is the number of the target vertex in the range $0$ to $n - 1$, $i$ is the number of the next edge in the range $0$ to $m - 1$ going out of the same source vertex, and \texttt{label} is an integer label; and a last \texttt{* Checksum …} line. Further, in the description of a vertex with no outgoing edge, or an edge with no successor going out of the same source vertex, \texttt{Ai} becomes \texttt{0}. Implement procedures to read a SGB graph and to write a graph in SGB format.}
+
+The \textbf{Stanford GraphBase (SGB)} format represents a directed graph in a structured way:
+
+\begin{itemize}
+    \item The first line begins with \texttt{* GraphBase graph (utiltypes ...,nV,mA)} where $n$ is the number of vertices and $m$ is the number of edges.
+    \item The second line is an identification string (can be stored or ignored).
+    \item The \texttt{* Vertices} section follows, with $n$ lines describing vertices in the format: \texttt{label,Ai,0,0}
+    \begin{itemize}
+        \item \texttt{label} is a string identifier.
+        \item \texttt{Ai} indicates the index (from $0$ to $m-1$) of the first outgoing edge from that vertex.
+        \item If there is no outgoing edge, \texttt{Ai} is \texttt{0}.
+    \end{itemize}
+    \item Then comes the \texttt{* Arcs} section, with $m$ lines describing directed edges (arcs) in the format: \texttt{Vj,Ai,label,0}
+    \begin{itemize}
+        \item \texttt{Vj} is the target vertex (in the range $0$ to $n-1$).
+        \item \texttt{Ai} is the index of the next edge from the same source vertex.
+        \item If there is no next edge, \texttt{Ai} is \texttt{0}.
+        \item \texttt{label} is an integer label for the edge.
+    \end{itemize}
+    \item A final line \texttt{* Checksum ...} concludes the graph.
+\end{itemize}
+
+To process this format, we implement two procedures:
+
+\textbf{Reading a SGB graph}
+\begin{itemize}
+    \item Parse the first line to extract $n$ and $m$.
+    \item Skip or store the second line (identifier).
+    \item In the \texttt{* Vertices} section:
+    \begin{itemize}
+        \item Read each vertex’s label and first outgoing edge index.
+        \item Store vertex labels and associate them with outgoing edge indices.
+    \end{itemize}
+    \item In the \texttt{* Arcs} section:
+    \begin{itemize}
+        \item Read each edge’s target vertex, next edge index, and label.
+        \item Construct an adjacency list or edge list accordingly.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Writing a SGB graph}
+\begin{itemize}
+    \item Output the graph header and identification string.
+    \item Write the \texttt{* Vertices} section with vertex descriptors.
+    \item Write the \texttt{* Arcs} section with edge descriptors.
+    \item Append a \texttt{* Checksum ...} line if needed.
+\end{itemize}
 
 \begin{baitoan}[Tree edit distance]
     Viết chương trình {\sf C{\tt/}C++, Python} để giải bài toán tree edit distance problem bằng cách sử dụng: (a) Backtracking. (b) Branch-\&-bound. (c) Divide-\&-conquer -- chia để trị. (d) Dynamic programming -- Quy hoạch động.
