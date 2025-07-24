@@ -571,81 +571,204 @@ Sẽ có $3A_4^3 + A_3^2 = 36 + 6 = 42$ converter programs.
 \textbf{(b) Giải thích thuật toán chuyển đổi biểu diễn đa đồ thị (multigraph):}
 
 \begin{itemize}
-    \item \textbf{Mục tiêu:} Chuyển đổi giữa 4 dạng biểu diễn đa đồ thị (multigraph): adjacency matrix, adjacency list, extended adjacency list, adjacency map.
-    \item \textbf{Đa đồ thị:} Đồ thị cho phép nhiều cạnh giữa cùng một cặp đỉnh (parallel edges), nhưng không cho phép khuyên (self-loop).
+    \item \textbf{Mục tiêu:} Chuyển đổi giữa 4 dạng biểu diễn đồ thị đa bộ (multigraph) không có khuyên (no self-loops): ma trận kề (Adjacency Matrix - AM), danh sách kề (Adjacency List - AL), danh sách kề mở rộng (Extended Adjacency List - EAL), và bản đồ kề (Adjacency Map - AMap).
+    \item \textbf{Đa đồ thị (Multigraph - không có khuyên):} Là đồ thị cho phép có nhiều hơn một cạnh nối giữa cùng một cặp đỉnh (cạnh song song), nhưng không cho phép cạnh nối một đỉnh với chính nó (khuyên - self-loop).
     \item \textbf{4 dạng biểu diễn:}
     \begin{itemize}
-        \item \textbf{Adjacency Matrix (AM):} Ma trận $n \times n$ với $A[i][j]$ là số lượng cạnh giữa $i$ và $j$ (không phải chỉ 0/1 như đồ thị đơn).
-        \item \textbf{Adjacency List (AL):} Mỗi đỉnh $i$ có một danh sách, mỗi phần tử là một đỉnh kề $j$ (có thể lặp lại nếu có nhiều cạnh giữa $i$ và $j$).
-        \item \textbf{Extended Adjacency List (EAL):} Danh sách các cạnh (mỗi cạnh là cặp $(u,v)$), và với mỗi đỉnh $i$ có danh sách các chỉ số cạnh đi ra (outgoing) và đi vào (incoming).
-        \item \textbf{Adjacency Map (AMap):} Dictionary với key là đỉnh, value là dictionary chứa các cạnh incoming và outgoing, mỗi cạnh là một tuple $(u,v)$, cho phép nhiều cạnh giống nhau.
+        \item \textbf{Adjacency Matrix (AM):} Ma trận $n \times n$ với $A[i][j]$ biểu thị \textbf{số lượng cạnh} nối từ đỉnh $i$ đến đỉnh $j$. Vì đồ thị vô hướng, $A[i][j] = A[j][i]$. $A[i][i]$ luôn là 0 vì không có khuyên.
+        \item \textbf{Adjacency List (AL):} Mảng $n$ danh sách. Mỗi danh sách $AL[i]$ chứa tất cả các đỉnh kề với đỉnh $i$. Nếu có nhiều cạnh giữa $i$ và $j$, $j$ sẽ xuất hiện nhiều lần trong $AL[i]$ (và $i$ sẽ xuất hiện nhiều lần trong $AL[j]$).
+        \item \textbf{Extended Adjacency List (EAL):}
+        \begin{itemize}
+            \item \texttt{edges}: Một danh sách chứa tất cả các cạnh riêng lẻ dưới dạng cặp $(u,v)$. Nếu có nhiều cạnh giữa $u$ và $v$, cặp $(u,v)$ sẽ xuất hiện nhiều lần trong danh sách này.
+            \item \texttt{incoming[v]}: Danh sách các chỉ số của các cạnh trong \texttt{edges} mà đi vào đỉnh $v$.
+            \item \texttt{outgoing[u]}: Danh sách các chỉ số của các cạnh trong \texttt{edges} mà đi ra từ đỉnh $u$.
+            \item $m$: Tổng số lượng cạnh (bao gồm các cạnh song song).
+        \end{itemize}
+        \item \textbf{Adjacency Map (AMap):}
+        \begin{itemize}
+            \item \texttt{outgoing[u]}: Một danh sách các tuple. Mỗi tuple là $(v, (canonical\_u, canonical\_v))$, trong đó $v$ là đỉnh kề và $(canonical\_u, canonical\_v)$ là dạng chính tắc của cạnh (min(u,v), max(u,v)). Nếu có nhiều cạnh giữa $u$ và $v$, tuple $(v, (min(u,v), max(u,v)))$ sẽ xuất hiện nhiều lần trong danh sách này.
+            \item \texttt{incoming[v]}: Tương tự như \texttt{outgoing}, nhưng cho các cạnh đi vào.
+            \item $m$: Tổng số lượng cạnh (bao gồm các cạnh song song).
+        \end{itemize}
     \end{itemize}
 \end{itemize}
 
-\textbf{Công thức chuyển đổi:}
+\textbf{Công thức chuyển đổi cho đa đồ thị (không có khuyên):}
 
 \begin{itemize}
     \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Matrix:}
     \begin{itemize}
-        \item AL $\to$ AM: Với mỗi đỉnh $i$, với mỗi $j$ trong danh sách kề của $i$, tăng $A[i][j]$ lên 1.
-        \item AM $\to$ AL: Với mỗi cặp $(i,j)$, thêm $A[i][j]$ lần $j$ vào danh sách kề của $i$.
+        \item AL $\to$ AM: Với mỗi đỉnh $i$ và mỗi đỉnh kề $j$ trong $AL[i]$: tăng $A[i][j]$ lên 1.
+        \item AM $\to$ AL: Với mỗi cặp $(i,j)$ mà $A[i][j] > 0$: thêm $j$ vào $AL[i]$ $A[i][j]$ lần.
     \end{itemize}
     \item \textbf{Adjacency List $\leftrightarrow$ Extended Adjacency List:}
     \begin{itemize}
-        \item AL $\to$ EAL: Với mỗi $i$, mỗi $j$ trong danh sách kề của $i$ ($i \leq j$), thêm cạnh $(i,j)$ vào danh sách cạnh (mỗi lần xuất hiện là một cạnh riêng biệt).
-        \item EAL $\to$ AL: Với mỗi cạnh $(u,v)$ trong danh sách cạnh, thêm $v$ vào danh sách kề của $u$ và $u$ vào danh sách kề của $v$.
+        \item AL $\to$ EAL: Duyệt qua $AL$. Với mỗi cạnh $(u,v)$ (với $u < v$ để tránh trùng lặp và khuyên), thêm $(u,v)$ vào \texttt{ext.edges} và cập nhật \texttt{incoming}/\texttt{outgoing} cho cả $u$ và $v$. Số lần xuất hiện của $(u,v)$ trong $AL[u]$ (hoặc $AL[v]$) sẽ xác định số lượng cạnh song song.
+        \item EAL $\to$ AL: Với mỗi cạnh $(u,v)$ trong \texttt{ext.edges}: thêm $v$ vào $AL[u]$ và thêm $u$ vào $AL[v]$.
     \end{itemize}
     \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Map:}
     \begin{itemize}
-        \item AL $\to$ AMap: Với mỗi $i$, mỗi $j$ trong danh sách kề của $i$ ($i \leq j$), thêm cạnh $(i,j)$ vào outgoing của $i$ và incoming của $j$ (và ngược lại nếu $i \neq j$).
-        \item AMap $\to$ AL: Duyệt qua tất cả các cạnh trong outgoing, thêm vào danh sách kề.
+        \item AL $\to$ AMap: Duyệt qua $AL$. Với mỗi cạnh $(u,v)$ (với $u < v$), thêm $(v, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.outgoing[u]} và $(u, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.incoming[v]}.
+        \item AMap $\to$ AL: Duyệt qua \texttt{adj\_map.outgoing}. Với mỗi cặp $(v, \text{canonical\_edge})$ trong \texttt{adj\_map.outgoing[u]}: thêm $v$ vào $AL[u]$.
     \end{itemize}
     \item \textbf{Adjacency Matrix $\leftrightarrow$ Extended Adjacency List:}
     \begin{itemize}
-        \item AM $\to$ EAL: Với mỗi cặp $(i,j)$ ($i \leq j$), thêm $A[i][j]$ cạnh $(i,j)$ vào danh sách cạnh.
-        \item EAL $\to$ AM: Với mỗi cạnh $(u,v)$ trong danh sách cạnh, tăng $A[u][v]$ và $A[v][u]$ lên 1.
+        \item AM $\to$ EAL: Duyệt qua $A[i][j]$. Với mỗi $A[i][j] > 0$ và $i < j$: thêm $(i,j)$ vào \texttt{ext.edges} $A[i][j]$ lần và cập nhật \texttt{incoming}/\texttt{outgoing} tương ứng.
+        \item EAL $\to$ AM: Với mỗi cạnh $(u,v)$ trong \texttt{ext.edges}: tăng $A[u][v]$ và $A[v][u]$ lên 1.
     \end{itemize}
     \item \textbf{Adjacency Matrix $\leftrightarrow$ Adjacency Map:}
     \begin{itemize}
-        \item AM $\to$ AMap: Với mỗi cặp $(i,j)$ ($i \leq j$), thêm $A[i][j]$ cạnh $(i,j)$ vào outgoing của $i$ và incoming của $j$ (và ngược lại nếu $i \neq j$).
-        \item AMap $\to$ AM: Duyệt qua tất cả các cạnh trong outgoing, tăng $A[u][v]$ và $A[v][u]$ lên 1.
+        \item AM $\to$ AMap: Duyệt qua $A[i][j]$. Với mỗi $A[i][j] > 0$ và $i < j$: thêm $(j, (min(i,j), max(i,j)))$ vào \texttt{adj\_map.outgoing[i]} $A[i][j]$ lần và $(i, (min(i,j), max(i,j)))$ vào \texttt{adj\_map.incoming[j]} $A[i][j]$ lần.
+        \item AMap $\to$ AM: Duyệt qua \texttt{adj\_map.outgoing}. Với mỗi cặp $(v, \text{canonical\_edge})$ trong \texttt{adj\_map.outgoing[u]}: tăng $A[u][v]$ lên 1.
     \end{itemize}
     \item \textbf{Extended Adjacency List $\leftrightarrow$ Adjacency Map:}
     \begin{itemize}
-        \item EAL $\to$ AMap: Với mỗi cạnh $(u,v)$ trong danh sách cạnh, thêm vào outgoing của $u$ và incoming của $v$ (và ngược lại nếu $u \neq v$).
-        \item AMap $\to$ EAL: Duyệt qua tất cả các cạnh trong outgoing, thu thập thành danh sách cạnh.
+        \item EAL $\to$ AMap: Với mỗi cạnh $(u,v)$ trong \texttt{ext.edges}: thêm $(v, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.outgoing[u]} và $(u, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.incoming[v]}.
+        \item AMap $\to$ EAL: Duyệt qua \texttt{adj\_map.outgoing} để đếm số lần xuất hiện của mỗi cạnh chính tắc. Sau đó, thêm các cạnh vào \texttt{ext.edges} và cập nhật \texttt{incoming}/\texttt{outgoing} tương ứng.
     \end{itemize}
 \end{itemize}
 
 \textbf{Giải thích code:}
 
 \begin{itemize}
-    \item \textbf{Biến số quan trọng:}
+    \item \textbf{Các lớp biểu diễn:} Các lớp \texttt{AdjacencyMatrix}, \texttt{AdjacencyList}, \texttt{ExtendedAdjacencyList}, \texttt{AdjacencyMap} được định nghĩa để lưu trữ cấu trúc dữ liệu của đồ thị.
+    \item \textbf{Xử lý đa cạnh:}
     \begin{itemize}
-        \item $n$: số lượng đỉnh của đồ thị
-        \item $m$: số lượng cạnh của đồ thị (tổng số cạnh, kể cả song song)
-        \item \texttt{adj\_list}: danh sách kề, \texttt{adj\_list[i]} chứa các đỉnh kề với đỉnh $i$ (có thể lặp lại)
-        \item \texttt{matrix}: ma trận $n \times n$, \texttt{matrix[i][j]} là số lượng cạnh giữa $i$ và $j$
-        \item \texttt{ext\_list}: extended adjacency list với danh sách cạnh, incoming/outgoing
-        \item \texttt{adj\_map}: adjacency map với dictionary cho incoming/outgoing edges (mỗi cạnh là một tuple, cho phép trùng lặp)
+        \item \texttt{AdjacencyMatrix.matrix[i][j]}: Lưu trữ số nguyên (integer) để đếm số lượng cạnh giữa $i$ và $j$.
+        \item \texttt{AdjacencyList.adj[i]}: Một đỉnh $j$ có thể xuất hiện nhiều lần trong danh sách \texttt{adj[i]} nếu có nhiều cạnh giữa $i$ và $j$.
+        \item \texttt{ExtendedAdjacencyList.edges}: Lưu trữ từng thể hiện riêng lẻ của một cạnh. Ví dụ, nếu có hai cạnh giữa 0 và 1, \texttt{edges} sẽ chứa \texttt{(0,1)} hai lần.
+        \item \texttt{AdjacencyMap.outgoing[u]} và \texttt{incoming[v]}: Mỗi danh sách này chứa các tuple \texttt{(neighbor, canonical\_edge)}. Nếu có nhiều cạnh giữa $u$ và $v$, tuple \texttt{(v, (min(u,v), max(u,v)))} sẽ xuất hiện nhiều lần.
     \end{itemize}
-    \item \textbf{Đọc input:} Dòng đầu: $n$ $m$, sau đó $m$ dòng mỗi dòng chứa 2 số $u$ $v$ biểu diễn cạnh $(u,v)$ (có thể lặp lại, không cho phép $u = v$)
-    \item \textbf{Menu tương tác:} Cho phép người dùng chọn loại chuyển đổi và hiển thị kết quả, kiểm tra hợp lệ như phần đồ thị đơn.
+    \item \textbf{Xử lý không có khuyên:}
+    \begin{itemize}
+        \item Trong hàm \texttt{main}, có kiểm tra \texttt{if u == v:} để bỏ qua các cạnh là khuyên.
+        \item Trong các hàm chuyển đổi như \texttt{matrix\_to\_extended}, \texttt{matrix\_to\_map}, \texttt{list\_to\_extended}, \texttt{list\_to\_map}, và \texttt{extended\_to\_map}, có các điều kiện \texttt{if i == j: continue} hoặc \texttt{if u == v: continue} để đảm bảo khuyên không được thêm vào hoặc xử lý.
+        \item Khi tính \texttt{actual\_edge\_count} trong \texttt{list\_to\_extended} và \texttt{map\_to\_extended}, không có trường hợp đặc biệt cho khuyên vì chúng đã được lọc ra.
+    \end{itemize}
+    \item \textbf{Tính tổng số cạnh ($m$):} Biến $m$ trong \texttt{ExtendedAdjacencyList} và \texttt{AdjacencyMap} được cập nhật để phản ánh tổng số lượng thể hiện cạnh.
 \end{itemize}
 
 \textbf{Ý nghĩa các biến chính:}
 
 \begin{itemize}
-    \item \texttt{AdjacencyMatrix.matrix[i][j]}: Số lượng cạnh giữa $i$ và $j$
-    \item \texttt{AdjacencyList.adj[i]}: Danh sách các đỉnh kề với đỉnh $i$ (có thể lặp lại)
-    \item \texttt{ExtendedAdjacencyList.edges}: Danh sách tất cả các cạnh (mỗi cạnh là một tuple $(u,v)$, có thể trùng lặp)
-    \item \texttt{ExtendedAdjacencyList.outgoing[i]}: Chỉ số các cạnh đi ra từ đỉnh $i$
-    \item \texttt{ExtendedAdjacencyList.incoming[i]}: Chỉ số các cạnh đi vào đỉnh $i$
-    \item \texttt{AdjacencyMap.outgoing[i]}: Danh sách các cạnh đi ra từ $i$ (có thể trùng lặp)
-    \item \texttt{AdjacencyMap.incoming[i]}: Danh sách các cạnh đi vào $i$ (có thể trùng lặp)
+    \item \texttt{AdjacencyMatrix.matrix[i][j]}: Số lượng cạnh nối đỉnh $i$ và đỉnh $j$.
+    \item \texttt{AdjacencyList.adj[i]}: Danh sách các đỉnh kề với đỉnh $i$, bao gồm cả sự lặp lại của các đỉnh nếu có đa cạnh.
+    \item \texttt{ExtendedAdjacencyList.edges}: Danh sách các cặp $(u,v)$ biểu diễn từng cạnh riêng lẻ của đồ thị.
+    \item \texttt{ExtendedAdjacencyList.outgoing[i]}: Danh sách các chỉ số (index) của các cạnh trong \texttt{ext.edges} mà bắt đầu từ đỉnh $i$.
+    \item \texttt{ExtendedAdjacencyList.incoming[i]}: Danh sách các chỉ số (index) của các cạnh trong \texttt{ext.edges} mà kết thúc tại đỉnh $i$.
+    \item \texttt{AdjacencyMap.outgoing[i]}: Danh sách các tuple \texttt{(neighbor, canonical\_edge)} cho các cạnh đi ra từ đỉnh $i$.
+    \item \texttt{AdjacencyMap.incoming[i]}: Danh sách các tuple \texttt{(neighbor, canonical\_edge)} cho các cạnh đi vào đỉnh $i$.
+    \item \texttt{canonical\_edge}: Một tuple \texttt{(min(u,v), max(u,v))} dùng để định danh duy nhất một cạnh không định hướng, bất kể thứ tự nhập vào.
 \end{itemize}
 
 %------------------- Hết giải thích chuyển đổi biểu diễn đa đồ thị -------------------%
+
+%------------------- Giải thích thuật toán và code chuyển đổi biểu diễn đồ thị tổng quát -------------------%
+
+\textbf{(c) Giải thích thuật toán chuyển đổi biểu diễn đồ thị tổng quát (General Graph):}
+
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Chuyển đổi giữa 4 dạng biểu diễn đồ thị tổng quát (general graph) cho phép cả đa cạnh và khuyên: ma trận kề (AM), danh sách kề (AL), danh sách kề mở rộng (EAL), và bản đồ kề (AMap).
+    \item \textbf{Đồ thị tổng quát (General Graph):} Là đồ thị cho phép có nhiều hơn một cạnh nối giữa cùng một cặp đỉnh (cạnh song song) và cho phép cạnh nối một đỉnh với chính nó (khuyên - self-loop).
+    \item \textbf{4 dạng biểu diễn:} Cấu trúc cơ bản tương tự như đa đồ thị, nhưng có sự khác biệt trong cách xử lý khuyên.
+    \begin{itemize}
+        \item \textbf{Adjacency Matrix (AM):} $A[i][j]$ vẫn biểu thị số lượng cạnh nối từ $i$ đến $j$. Điểm khác biệt là $A[i][i]$ có thể lớn hơn 0 nếu có khuyên tại đỉnh $i$.
+        \item \textbf{Adjacency List (AL):} Tương tự đa đồ thị, nhưng $AL[i]$ có thể chứa $i$ nhiều lần nếu có khuyên tại đỉnh $i$.
+        \item \textbf{Extended Adjacency List (EAL):} \texttt{edges} sẽ chứa các cặp $(u,u)$ cho khuyên. \texttt{incoming}/\texttt{outgoing} sẽ trỏ đến các chỉ số của khuyên đó.
+        \item \textbf{Adjacency Map (AMap):} \texttt{outgoing[u]} và \texttt{incoming[v]} sẽ chứa các tuple \texttt{(u, (u,u))} cho khuyên tại đỉnh $u$.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Công thức chuyển đổi cho đồ thị tổng quát:}
+
+\begin{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Matrix:}
+    \begin{itemize}
+        \item AL $\to$ AM: Giống như đa đồ thị. Khuyên $(i,i)$ sẽ làm tăng $A[i][i]$ lên 1.
+        \item AM $\to$ AL: Giống như đa đồ thị. Nếu $A[i][i] > 0$, $i$ sẽ được thêm vào $AL[i]$ $A[i][i]$ lần.
+    \end{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Extended Adjacency List:}
+    \begin{itemize}
+        \item AL $\to$ EAL: Duyệt qua $AL$. Với mỗi cạnh $(u,v)$:
+        \begin{itemize}
+            \item Nếu $u = v$ (khuyên): thêm $(u,u)$ vào \texttt{ext.edges} và cập nhật \texttt{incoming}/\texttt{outgoing} cho $u$.
+            \item Nếu $u \neq v$: thêm $(min(u,v), max(u,v))$ vào \texttt{ext.edges} và cập nhật \texttt{incoming}/\texttt{outgoing} cho cả $u$ và $v$.
+        \end{itemize}
+        \item EAL $\to$ AL: Với mỗi cạnh $(u,v)$ trong \texttt{ext.edges}: thêm $v$ vào $AL[u]$. Nếu $u \neq v$, thêm $u$ vào $AL[v]$.
+    \end{itemize}
+    \item \textbf{Adjacency List $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item AL $\to$ AMap: Duyệt qua $AL$. Với mỗi cạnh $(u,v)$:
+        \begin{itemize}
+            \item Thêm $(v, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.outgoing[u]}.
+            \item Thêm $(u, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.incoming[v]}.
+        \end{itemize}
+        \item AMap $\to$ AL: Giống như đa đồ thị. Duyệt qua \texttt{adj\_map.outgoing}. Với mỗi cặp $(v, \text{canonical\_edge})$ trong \texttt{adj\_map.outgoing[u]}: thêm $v$ vào $AL[u]$.
+    \end{itemize}
+    \item \textbf{Adjacency Matrix $\leftrightarrow$ Extended Adjacency List:}
+    \begin{itemize}
+        \item AM $\to$ EAL: Duyệt qua $A[i][j]$. Với mỗi $A[i][j] > 0$:
+        \begin{itemize}
+            \item Nếu $i = j$ (khuyên): thêm $(i,i)$ vào \texttt{ext.edges} $A[i][i]$ lần và cập nhật \texttt{incoming}/\texttt{outgoing} cho $i$.
+            \item Nếu $i < j$ (cạnh không phải khuyên): thêm $(i,j)$ vào \texttt{ext.edges} $A[i][j]$ lần và cập nhật \texttt{incoming}/\texttt{outgoing} cho cả $i$ và $j$.
+        \end{itemize}
+        \item EAL $\to$ AM: Giống như đa đồ thị. Với mỗi cạnh $(u,v)$ trong \texttt{ext.edges}: tăng $A[u][v]$ lên 1. Nếu $u \neq v$, tăng $A[v][u]$ lên 1.
+    \Hfill
+    \end{itemize}
+    \item \textbf{Adjacency Matrix $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item AM $\to$ AMap: Duyệt qua $A[i][j]$. Với mỗi $A[i][j] > 0$:
+        \begin{itemize}
+            \item Thêm $(j, (min(i,j), max(i,j)))$ vào \texttt{adj\_map.outgoing[i]} $A[i][j]$ lần.
+            \item Thêm $(i, (min(i,j), max(i,j)))$ vào \texttt{adj\_map.incoming[j]} $A[i][j]$ lần.
+        \end{itemize}
+        \item AMap $\to$ AM: Giống như đa đồ thị. Duyệt qua \texttt{adj\_map.outgoing}. Với mỗi cặp $(v, \text{canonical\_edge})$ trong \texttt{adj\_map.outgoing[u]}: tăng $A[u][v]$ lên 1.
+    \end{itemize}
+    \item \textbf{Extended Adjacency List $\leftrightarrow$ Adjacency Map:}
+    \begin{itemize}
+        \item EAL $\to$ AMap: Giống như đa đồ thị. Với mỗi cạnh $(u,v)$ trong \texttt{ext.edges}: thêm $(v, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.outgoing[u]} và $(u, (min(u,v), max(u,v)))$ vào \texttt{adj\_map.incoming[v]}.
+        \item AMap $\to$ EAL: Duyệt qua \texttt{adj\_map.outgoing} để đếm số lần xuất hiện của mỗi cạnh chính tắc. Sau đó, thêm các cạnh vào \texttt{ext.edges} và cập nhật \texttt{incoming}/\texttt{outgoing} tương ứng.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Các lớp biểu diễn:} Cấu trúc các lớp Python \texttt{AdjacencyMatrix}, \texttt{AdjacencyList}, \texttt{ExtendedAdjacencyList}, \texttt{AdjacencyMap} về cơ bản giống như phiên bản đa đồ thị, nhưng cách chúng được điền dữ liệu và xử lý khuyên sẽ khác.
+    \item \textbf{Xử lý đa cạnh và khuyên:}
+    \begin{itemize}
+        \item \texttt{AdjacencyMatrix.matrix[i][j]}: Vẫn lưu trữ số lượng cạnh. $A[i][i]$ có thể lớn hơn 0.
+        \item \texttt{AdjacencyList.adj[i]}: Đỉnh $i$ có thể xuất hiện nhiều lần trong \texttt{adj[i]} nếu có khuyên.
+        \item \texttt{ExtendedAdjacencyList.edges}: Sẽ chứa các cặp $(u,u)$ cho khuyên.
+        \item \texttt{AdjacencyMap.outgoing[u]} và \texttt{incoming[v]}: Sẽ chứa các tuple \texttt{(u, (u,u))} cho khuyên.
+    \end{itemize}
+    \item \textbf{Điểm khác biệt chính so với đa đồ thị (không có khuyên):}
+    \begin{itemize}
+        \item \textbf{Loại bỏ kiểm tra khuyên:} Trong hàm \texttt{main} và các hàm chuyển đổi (ví dụ: \texttt{matrix\_to\_extended}, \texttt{matrix\_to\_map}, \texttt{list\_to\_extended}, \texttt{list\_to\_map}, \texttt{extended\_to\_map}), các điều kiện \texttt{if u == v: continue} hoặc \texttt{if i == j: continue} sẽ \textbf{bị loại bỏ} hoặc \textbf{thay đổi} để cho phép và xử lý khuyên.
+        \item \textbf{Tính toán \texttt{actual\_edge\_count}:} Trong các hàm như \texttt{list\_to\_extended} và \texttt{map\_to\_extended}, logic để tính \texttt{actual\_edge\_count} sẽ phân biệt rõ ràng giữa khuyên và cạnh thông thường.
+        \begin{itemize}
+            \item Đối với khuyên $(u,u)$: \texttt{actual\_edge\_count} sẽ bằng số lần nó xuất hiện trong tổng danh sách kề (hoặc tổng số lần xuất hiện trong map).
+            \item Đối với cạnh $(u,v)$ không phải khuyên: \texttt{actual\_edge\_count} sẽ bằng một nửa số lần nó xuất hiện trong tổng danh sách kề (hoặc tổng số lần xuất hiện trong map), vì nó được đếm hai lần (một lần từ $u$, một lần từ $v$).
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Tính tổng số cạnh ($m$):} Biến $m$ vẫn phản ánh tổng số lượng thể hiện cạnh, bao gồm cả khuyên.
+\end{itemize}
+
+\textbf{Ý nghĩa các biến chính:}
+
+\begin{itemize}
+    \item \texttt{AdjacencyMatrix.matrix[i][j]}: Số lượng cạnh nối đỉnh $i$ và đỉnh $j$. Bao gồm cả khuyên ($i=j$).
+    \item \texttt{AdjacencyList.adj[i]}: Danh sách các đỉnh kề với đỉnh $i$, bao gồm cả sự lặp lại của các đỉnh và chính đỉnh $i$ nếu có khuyên.
+    \item \texttt{ExtendedAdjacencyList.edges}: Danh sách các cặp $(u,v)$ biểu diễn từng cạnh riêng lẻ của đồ thị, bao gồm cả các khuyên $(u,u)$.
+    \item \texttt{ExtendedAdjacencyList.outgoing[i]}: Danh sách các chỉ số (index) của các cạnh trong \texttt{ext.edges} mà bắt đầu từ đỉnh $i$.
+    \item \texttt{ExtendedAdjacencyList.incoming[i]}: Danh sách các chỉ số (index) của các cạnh trong \texttt{ext.edges} mà kết thúc tại đỉnh $i$.
+    \item \texttt{AdjacencyMap.outgoing[i]}: Danh sách các tuple \texttt{(neighbor, canonical\_edge)} cho các cạnh đi ra từ đỉnh $i$. Nếu có khuyên, nó sẽ chứa \texttt{(i, (i,i))}.
+    \item \texttt{AdjacencyMap.incoming[i]}: Danh sách các tuple \texttt{(neighbor, canonical\_edge)} cho các cạnh đi vào đỉnh $i$. Nếu có khuyên, nó sẽ chứa \texttt{(i, (i,i))}.
+    \item \texttt{canonical\_edge}: Một tuple \texttt{(min(u,v), max(u,v))} dùng để định danh duy nhất một cạnh không định hướng, bao gồm cả khuyên.
+\end{itemize}
+
+%------------------- Hết giải thích chuyển đổi biểu diễn đồ thị tổng quát -------------------%
+
 
 \begin{baitoan}
     Làm Problems 1.1--1.6 \& Exercises 1.1--1.10
@@ -979,6 +1102,79 @@ To process this format, we implement two procedures:
 \begin{baitoan}[Tree edit distance]
     Viết chương trình {\sf C{\tt/}C++, Python} để giải bài toán tree edit distance problem bằng cách sử dụng: (a) Backtracking. (b) Branch-\&-bound. (c) Divide-\&-conquer -- chia để trị. (d) Dynamic programming -- Quy hoạch động.
 \end{baitoan}
+
+%------------------- Giải thích thuật toán và code tree edit distance bằng Backtracking -------------------%
+
+\textbf{(a) Phương pháp Backtracking}
+
+\textbf{Giải thích và công thức:}
+
+\begin{itemize}
+    \item \textbf{Bài toán:} Cho hai cây có gốc $T_1 = (V_1, E_1)$ và $T_2 = (V_2, E_2)$ (có thứ tự), tìm tất cả các ánh xạ hợp lệ từ các nút của $T_1$ sang các nút của $T_2$ (hoặc nút giả $\lambda$), tương ứng với các phép biến đổi cây (tree edit mapping).
+    \item \textbf{Ý tưởng:} Duyệt tất cả các ánh xạ từng phần $M \subseteq V_1 \times (V_2 \cup \{\lambda\})$ bằng đệ quy quay lui (backtracking), đảm bảo các ràng buộc:
+    \begin{itemize}
+        \item Mỗi nút $v \in V_1$ được gán cho đúng một nút $w \in V_2$ cùng độ sâu (hoặc $\lambda$ nếu xóa $v$).
+        \item Không có hai nút $v_1, v_2 \in V_1$ cùng gán vào một nút $w \in V_2$ (trừ $\lambda$) -- ánh xạ là song ánh trên $V_2$.
+        \item Nếu $v$ là cha của $x$ trong $T_1$ và $w$ là ảnh của $v$ trong $T_2$, thì ảnh của $x$ (nếu không phải $\lambda$) phải là con của $w$ trong $T_2$.
+        \item Ràng buộc thứ tự anh em: nếu $x$ là anh phải của $v$ trong $T_1$, thì ảnh của $x$ (nếu không phải $\lambda$) không được là anh trái của $w$ trong $T_2$.
+    \end{itemize}
+    \item \textbf{Cách xây dựng ánh xạ:}
+    \begin{itemize}
+        \item Duyệt các nút $v$ của $T_1$ theo thứ tự preorder.
+        \item Với mỗi $v$, thử gán vào từng $w$ thuộc tập ứng viên $C[v]$ (các nút $w \in V_2$ cùng độ sâu với $v$ hoặc $\lambda$).
+        \item Sau mỗi lần gán $v \to w$, cập nhật lại tập ứng viên cho các nút còn lại (loại bỏ $w$ khỏi các ứng viên khác nếu $w \neq \lambda$; loại bỏ các $y$ không phải con của $w$ khỏi ứng viên của các con $x$ của $v$; loại bỏ các $y$ vi phạm thứ tự anh em).
+        \item Nếu đã gán hết các nút của $T_1$, lưu ánh xạ vào danh sách kết quả.
+    \end{itemize}
+    \item \textbf{Công thức đệ quy:}
+    \begin{itemize}
+        \item Gọi $M$ là ánh xạ hiện tại, $C$ là tập ứng viên hiện tại, $v$ là nút đang xét.
+        \item Với mỗi $w \in C[v]$:
+        \begin{itemize}
+            \item Gán $M[v] = w$.
+            \item Nếu $v$ là nút cuối cùng: lưu $M$ vào kết quả.
+            \item Ngược lại: cập nhật $C$ thành $N$ bằng hàm refine (loại các ứng viên không hợp lệ), gọi đệ quy với nút tiếp theo.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Tập ứng viên $C[v]$:} Gồm các nút $w \in V_2$ cùng độ sâu với $v$ và nút giả $\lambda$ (tương ứng với phép xóa).
+\end{itemize}
+
+\textbf{Giải thích code:}
+
+\begin{itemize}
+    \item \textbf{Các lớp chính:}
+    \begin{itemize}
+        \item \texttt{TreeNode}: đại diện cho một nút của cây, gồm nhãn, danh sách con, cha, độ sâu, thứ tự preorder, thứ tự anh em.
+        \item \texttt{Tree}: đại diện cho một cây, gồm danh sách nút, gốc, nút giả $\lambda$, độ sâu lớn nhất.
+    \end{itemize}
+    \item \textbf{Các hàm chính:}
+    \begin{itemize}
+        \item \texttt{assign\_preorder\_and\_depth}: Gán số preorder, độ sâu, thứ tự anh em cho từng nút bằng duyệt DFS.
+        \item \texttt{add\_dummy}: Thêm nút giả $\lambda$ vào cây (dùng cho phép xóa).
+        \item \texttt{set\_up\_candidate\_nodes}: Khởi tạo tập ứng viên $C[v]$ cho mỗi $v$ của $T_1$.
+        \item \texttt{refine\_candidate\_nodes}: Sau khi gán $v \to w$, cập nhật lại $C$ cho các nút còn lại:
+        \begin{itemize}
+            \item Loại $w$ khỏi các ứng viên khác nếu $w \neq \lambda$ (ràng buộc song ánh).
+            \item Với mỗi con $x$ của $v$, loại các $y$ không phải con của $w$ khỏi $C[x]$.
+            \item Ràng buộc thứ tự anh em: nếu $x$ là anh phải của $v$, loại các $y$ là anh trái của $w$ khỏi $C[x]$.
+        \end{itemize}
+        \item \texttt{extend\_tree\_edit}: Hàm đệ quy chính, thử tất cả các ánh xạ $v \to w$ và gọi đệ quy cho nút tiếp theo.
+        \item \texttt{backtracking\_tree\_edit}: Hàm tổng, khởi tạo các biến, gọi hàm đệ quy và trả về danh sách ánh xạ hợp lệ.
+    \end{itemize}
+    \item \textbf{Ý nghĩa các biến số chính:}
+    \begin{itemize}
+        \item \texttt{T1, T2}: hai cây đầu vào.
+        \item \texttt{M}: ánh xạ hiện tại từ nút $T_1$ sang $T_2$ (hoặc $\lambda$).
+        \item \texttt{L}: danh sách các ánh xạ hợp lệ tìm được.
+        \item \texttt{C}: tập ứng viên cho từng nút $T_1$.
+        \item \texttt{v, w}: nút đang xét của $T_1$ và ứng viên ánh xạ của $T_2$.
+        \item \texttt{preorder\_list\_T1}: danh sách các nút $T_1$ theo thứ tự preorder.
+    \end{itemize}
+    \item \textbf{Độ phức tạp:} Phương pháp này liệt kê tất cả các ánh xạ hợp lệ, nên độ phức tạp là hàm mũ theo số nút.
+    \item \textbf{Ưu điểm:} Đơn giản, dễ cài đặt, cho phép sinh tất cả ánh xạ hợp lệ (dùng cho kiểm thử, sinh ví dụ nhỏ).
+    \item \textbf{Nhược điểm:} Không hiệu quả với cây lớn do số ánh xạ hợp lệ tăng rất nhanh.
+\end{itemize}
+
+%------------------- Hết giải thích tree edit distance bằng Backtracking -------------------%
 
 \begin{baitoan}[Tree traversal -- Duyệt cây]
     Viết chương trình {\sf C{\tt/}C++, Python} để duyệt cây: (a) preorder traversal. (b) postorder traversal. (c) top-down traveral. (d) bottom-up traversal.
